@@ -1,6 +1,10 @@
 // admin.js — powers admin.html
 // Requires config.js (defines `supabaseClient`) to be loaded first.
 
+function isUuid(str) {
+  return typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 // ---------------------------------------------------------------------------
 // AUTH
 // ---------------------------------------------------------------------------
@@ -689,8 +693,13 @@ function renderApplicantsTable() {
     countEl.textContent = `(${filtered.length} of ${applicantsCache.length})`;
   }
 
+  if (applicantsCache.length === 0) {
+    tbody.innerHTML = `<tr><td class="p-8 text-text-muted text-center text-body-sm" colspan="10">No applicants registered yet. New attendee registrations will appear here in real time.</td></tr>`;
+    return;
+  }
+
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td class="p-4 text-text-muted text-center" colspan="10">No applicants found matching filter criteria.</td></tr>`;
+    tbody.innerHTML = `<tr><td class="p-6 text-text-muted text-center text-body-sm" colspan="10">No applicants found matching your filter criteria.</td></tr>`;
     return;
   }
 
@@ -747,7 +756,7 @@ function renderApplicantsTable() {
       updateMetricsDashboard();
       renderApplicantsTable();
 
-      if (supabaseClient) {
+      if (supabaseClient && isUuid(applicantId)) {
         try {
           await supabaseClient
             .from("applicants")
@@ -775,8 +784,8 @@ function renderApplicantsTable() {
       updateMetricsDashboard();
       renderApplicantsTable();
 
-      // Persist delete to Supabase if connected
-      if (supabaseClient) {
+      // Persist delete to Supabase if connected and ID is a valid database UUID
+      if (supabaseClient && isUuid(id)) {
         try {
           const { error } = await supabaseClient.from("applicants").delete().eq("id", id);
           if (error) {
@@ -836,19 +845,23 @@ const SAMPLE_PARTNERS = [
 
 async function loadApplicants() {
   let records = [];
+  let dbSuccess = false;
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient.from("applicants").select("*").order("created_at", { ascending: false });
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         records = data;
+        dbSuccess = true;
+      } else if (error) {
+        console.warn("Applicants fetch error:", error);
       }
     } catch (e) {
       console.warn("Applicants fetch:", e);
     }
   }
 
-  // If no live database rows exist yet, populate with realistic organizer samples
-  if (records.length === 0) {
+  // Only fall back to sample delegates if Supabase is completely unavailable
+  if (!dbSuccess && !supabaseClient && records.length === 0) {
     records = [...SAMPLE_DELEGATES];
   }
 
@@ -931,18 +944,23 @@ document.getElementById("export-applicants-btn").addEventListener("click", () =>
 async function loadPartnerRequests() {
   const tbody = document.getElementById("partner-requests-table-body");
   let records = [];
+  let dbSuccess = false;
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient.from("partner_applications").select("*").order("created_at", { ascending: false });
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         records = data;
+        dbSuccess = true;
+      } else if (error) {
+        console.warn("Partner requests fetch error:", error);
       }
     } catch (e) {
       console.warn("Partner requests fetch:", e);
     }
   }
 
-  if (records.length === 0) {
+  // Only fall back to sample partners if Supabase is completely unavailable
+  if (!dbSuccess && !supabaseClient && records.length === 0) {
     records = [...SAMPLE_PARTNERS];
   }
 
@@ -988,7 +1006,7 @@ async function loadPartnerRequests() {
       if (target) target.status = newStatus;
       updateMetricsDashboard();
 
-      if (supabaseClient) {
+      if (supabaseClient && isUuid(sel.dataset.id)) {
         await supabaseClient.from("partner_applications").update({ status: newStatus }).eq("id", sel.dataset.id);
       }
     })
@@ -1008,7 +1026,8 @@ async function loadPartnerRequests() {
       updateMetricsDashboard();
       loadPartnerRequests();
 
-      if (supabaseClient) {
+      // Only attempt database deletion if connected AND ID is a valid database UUID
+      if (supabaseClient && isUuid(id)) {
         try {
           const { error } = await supabaseClient.from("partner_applications").delete().eq("id", id);
           if (error) {
