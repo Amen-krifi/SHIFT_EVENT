@@ -11,7 +11,7 @@ import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const EVENT_NAME = "SHIFT — Where Business Meets AI";
+const EVENT_NAME = "SHIFT — EVENT";
 const EVENT_DATE = "November 28, 2026";
 const EVENT_ORGANIZER = "AIESEC in Bardo";
 
