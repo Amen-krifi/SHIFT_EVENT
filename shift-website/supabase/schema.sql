@@ -62,7 +62,7 @@ create table if not exists public.applicants (
   phone text,
   university text,
   faculty text,
-  status text not null default 'registered',   -- registered | cancelled
+  status text not null default 'registered',   -- registered | attended | vip | cancelled
   confirmation_sent boolean not null default false,
   confirmation_sent_at timestamptz,
   reminder_sent_at timestamptz,

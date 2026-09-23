@@ -1,0 +1,17 @@
+{
+  "name": "shift-website",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "dev": "node server.js",
+    "lint": "node --check server.js && node --check api/index.js && node --check build.js && node --check shift-website/site.js && node --check shift-website/admin.js",
+    "build": "node build.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
