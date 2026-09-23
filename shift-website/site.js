@@ -668,20 +668,20 @@ function initRegisterForm() {
 
     if (supabaseClient) {
       try {
-        // Direct insert into applicants table — no verification/lookup query against the database
-        const { data: insertedData, error } = await supabaseClient
+        // Direct insert into applicants table without .select() so anon RLS insert policy succeeds
+        const { error } = await supabaseClient
           .from("applicants")
-          .insert([payload])
-          .select();
+          .insert(payload);
 
         if (error) {
+          console.error("Registration error:", error);
           submitBtn.disabled = false;
           if (submitLabel) submitLabel.textContent = "Submit Registration";
           if (msgEl) {
             msgEl.textContent =
               error.code === "23505"
                 ? "That email is already registered — see you at SHIFT!"
-                : "Unable to complete registration. Please verify details and try again.";
+                : (error.message || "Unable to complete registration. Please verify details and try again.");
             msgEl.classList.remove("hidden");
             msgEl.classList.add("text-error");
           }
@@ -691,9 +691,8 @@ function initRegisterForm() {
         // Fire live Supabase Edge Function (send-confirmation)
         try {
           if (supabaseClient.functions && typeof supabaseClient.functions.invoke === "function") {
-            const applicantId = insertedData && insertedData[0] ? insertedData[0].id : undefined;
             await supabaseClient.functions.invoke("send-confirmation", {
-              body: { full_name: payload.full_name, email: payload.email, applicant_id: applicantId },
+              body: { full_name: payload.full_name, email: payload.email },
             });
           }
         } catch (emailErr) {
