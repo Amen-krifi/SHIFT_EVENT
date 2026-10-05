@@ -762,20 +762,14 @@ function initRegisterForm() {
     const qrBox = document.getElementById("pass-qrcode-box");
     if (qrBox) {
       qrBox.innerHTML = "";
-      const qrPayload = JSON.stringify({
-        event: "SHIFT2026",
-        email: payload.email,
-        name: payload.full_name,
-        code: currentPassCode,
-        ts: Date.now()
-      });
+            const qrPayload = `${currentPassCode}|${payload.email}`;
 
       if (typeof QRCode !== "undefined") {
         try {
           new QRCode(qrBox, {
             text: qrPayload,
-            width: 96,
-            height: 96,
+            width: 220,
+            height: 220,
             colorDark: "#0F172A",
             colorLight: "#FFFFFF",
             correctLevel: QRCode.CorrectLevel.M
