@@ -100,10 +100,18 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
 // ---------------------------------------------------------------------------
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
+    const tabName = btn.dataset.tab;
     document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
     document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
     btn.classList.add("active");
-    document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
+    const panel = document.getElementById(`panel-${tabName}`);
+    if (panel) panel.classList.add("active");
+
+    if (tabName === "scanner") {
+      onScannerTabOpened();
+    } else {
+      onScannerTabClosed();
+    }
   });
 });
 
@@ -492,13 +500,13 @@ function renderSparkline(points) {
   svg.innerHTML = `
     <defs>
       <linearGradient id="sparkline-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#CDF148" stop-opacity="0.35" />
-        <stop offset="100%" stop-color="#CDF148" stop-opacity="0.0" />
+        <stop offset="0%" stop-color="#9FD54B" stop-opacity="0.35" />
+        <stop offset="100%" stop-color="#9FD54B" stop-opacity="0.0" />
       </linearGradient>
     </defs>
     <path d="${areaD}" fill="url(#sparkline-grad)" />
-    <path d="${lineD}" fill="none" stroke="#CDF148" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <circle cx="${coords[coords.length - 1].x}" cy="${coords[coords.length - 1].y}" r="3" fill="#CDF148" />
+    <path d="${lineD}" fill="none" stroke="#9FD54B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="${coords[coords.length - 1].x}" cy="${coords[coords.length - 1].y}" r="3" fill="#9FD54B" />
   `;
 }
 
@@ -556,7 +564,7 @@ function renderFullGraph(points) {
       const barY = h - padBottom - barH;
       const barX = c.x - barWidth / 2;
       return `
-        <rect x="${barX}" y="${barY}" width="${barWidth}" height="${barH}" rx="2" fill="rgba(205,241,72,0.2)" stroke="rgba(205,241,72,0.4)" stroke-width="1" class="transition-all hover:fill-primary-container/40" />
+        <rect x="${barX}" y="${barY}" width="${barWidth}" height="${barH}" rx="2" fill="rgba(159,213,75,0.2)" stroke="rgba(159,213,75,0.4)" stroke-width="1" class="transition-all hover:fill-primary-container/40" />
       `;
     })
     .join("");
@@ -567,7 +575,7 @@ function renderFullGraph(points) {
       (c, i) => `
       <g class="graph-point-marker cursor-pointer" data-idx="${i}">
         <circle cx="${c.x}" cy="${c.y}" r="8" fill="transparent" />
-        <circle cx="${c.x}" cy="${c.y}" r="4" fill="#0c0d0e" stroke="#CDF148" stroke-width="2" class="transition-transform duration-200 hover:scale-150" />
+        <circle cx="${c.x}" cy="${c.y}" r="4" fill="#0F172A" stroke="#9FD54B" stroke-width="2" class="transition-transform duration-200 hover:scale-150" />
       </g>
     `
     )
@@ -576,17 +584,17 @@ function renderFullGraph(points) {
   svg.innerHTML = `
     <defs>
       <linearGradient id="full-graph-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#CDF148" stop-opacity="0.32" />
-        <stop offset="100%" stop-color="#CDF148" stop-opacity="0.0" />
+        <stop offset="0%" stop-color="#9FD54B" stop-opacity="0.32" />
+        <stop offset="100%" stop-color="#9FD54B" stop-opacity="0.0" />
       </linearGradient>
       <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#CDF148" flood-opacity="0.5" />
+        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#9FD54B" flood-opacity="0.5" />
       </filter>
     </defs>
     ${gridSvg}
     ${barsSvg}
     <path d="${areaD}" fill="url(#full-graph-gradient)" />
-    <path d="${lineD}" fill="none" stroke="#CDF148" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#neon-glow)" />
+    <path d="${lineD}" fill="none" stroke="#9FD54B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#neon-glow)" />
     ${pointsSvg}
   `;
 
@@ -716,19 +724,30 @@ function renderApplicantsTable() {
 
       return `
     <tr class="border-b border-surface-border/50 hover:bg-surface-card-hover/40 transition-colors">
-      <td class="p-3 font-medium text-text-primary">${escapeHtml(a.full_name)}</td>
+      <td class="p-3 font-medium text-text-primary">
+        <div class="flex items-center gap-2">
+          <span>${escapeHtml(a.full_name)}</span>
+          ${currentStatus === "attended" ? '<span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_6px_rgba(159,213,75,0.8)]" title="Checked in &amp; Present"></span>' : ''}
+        </div>
+      </td>
       <td class="p-3 font-label-code text-xs text-secondary">${escapeHtml(a.email)}</td>
       <td class="p-3 font-label-code text-xs text-text-muted">${escapeHtml(a.phone)}</td>
       <td class="p-3 text-xs">${escapeHtml(a.university) || "—"}</td>
       <td class="p-3 text-xs text-text-muted">${escapeHtml(a.faculty) || "—"}</td>
       <td class="p-3 text-text-muted font-label-code text-xs">${new Date(a.created_at).toLocaleDateString()}</td>
       <td class="p-3">
-        <select class="applicant-status-select text-xs font-label-code rounded-lg px-2.5 py-1 border transition-all focus:outline-none ${badgeClass}" data-id="${a.id}">
-          <option value="registered" ${currentStatus === "registered" ? "selected" : ""}>Registered</option>
-          <option value="attended" ${currentStatus === "attended" ? "selected" : ""}>Attended (Checked In)</option>
-          <option value="vip" ${currentStatus === "vip" ? "selected" : ""}>VIP Delegate</option>
-          <option value="cancelled" ${currentStatus === "cancelled" ? "selected" : ""}>Cancelled</option>
-        </select>
+        <div class="flex items-center gap-2">
+          <select class="applicant-status-select text-xs font-label-code rounded-lg px-2.5 py-1 border transition-all focus:outline-none ${badgeClass}" data-id="${a.id}">
+            <option value="registered" ${currentStatus === "registered" ? "selected" : ""}>Registered</option>
+            <option value="attended" ${currentStatus === "attended" ? "selected" : ""}>Attended (Checked In)</option>
+            <option value="vip" ${currentStatus === "vip" ? "selected" : ""}>VIP Delegate</option>
+            <option value="cancelled" ${currentStatus === "cancelled" ? "selected" : ""}>Cancelled</option>
+          </select>
+          <button type="button" class="applicant-quick-checkin-btn px-2.5 py-1 rounded-md text-[11px] font-label-code font-bold transition-all shrink-0 flex items-center gap-1 ${currentStatus === 'attended' ? 'bg-primary-container text-on-primary shadow-[0_0_8px_rgba(159,213,75,0.4)]' : 'bg-surface-container text-text-muted hover:bg-primary-container hover:text-on-primary border border-surface-border'}" data-id="${a.id}" title="${currentStatus === 'attended' ? 'Attendee is marked Present. Click to undo.' : 'Click to mark Present'}">
+            <span class="material-symbols-outlined text-[14px]">${currentStatus === 'attended' ? 'check_circle' : 'how_to_reg'}</span>
+            <span>${currentStatus === 'attended' ? 'Present' : 'Check In'}</span>
+          </button>
+        </div>
       </td>
       <td class="p-3 text-center text-xs">${a.confirmation_sent ? '<span class="text-primary-container font-bold">✓</span>' : '<span class="text-text-muted">—</span>'}</td>
       <td class="p-3 text-center text-xs">${a.reminder_sent_at ? '<span class="text-primary-container font-bold">✓</span>' : '<span class="text-text-muted">—</span>'}</td>
@@ -751,9 +770,13 @@ function renderApplicantsTable() {
       const target = applicantsCache.find((x) => x.id === applicantId);
       if (target) {
         target.status = newStatus;
+        if (newStatus === "attended" && !target.checked_in_at) {
+          target.checked_in_at = new Date().toISOString();
+        }
       }
 
       updateMetricsDashboard();
+      updateGateScannerStats();
       renderApplicantsTable();
 
       if (supabaseClient && isUuid(applicantId)) {
@@ -765,6 +788,21 @@ function renderApplicantsTable() {
         } catch (err) {
           console.warn("Failed to persist applicant status:", err);
         }
+      }
+    });
+  });
+
+  // Attach click listener to quick check-in buttons
+  tbody.querySelectorAll(".applicant-quick-checkin-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const applicantId = btn.dataset.id;
+      const target = applicantsCache.find((x) => x.id === applicantId);
+      if (!target) return;
+
+      if (target.status === "attended") {
+        await undoCheckin(applicantId);
+      } else {
+        await processCheckin(target.email, "manual");
       }
     });
   });
@@ -869,6 +907,7 @@ async function loadApplicants() {
   updateUniversityDropdownOptions();
   updateMetricsDashboard();
   renderApplicantsTable();
+  updateGateScannerStats();
 }
 
 document.getElementById("send-reminders-btn").addEventListener("click", async () => {
@@ -1504,6 +1543,732 @@ function initAgendaAdmin() {
   loadAgendaAdmin();
 }
 
+// ===========================================================================
+// GATE QR CODE SCANNER & ATTENDANCE SYSTEM
+// ===========================================================================
+let html5QrScannerInstance = null;
+let scannerSoundEnabled = true;
+let scannerCurrentCameraId = null;
+let isScannerActive = false;
+let scannerCooldownTimer = 0;
+let lastScannedPayload = null;
+let gateRecentCheckins = [];
+
+// Audio Chime synthesizer using Web Audio API
+function playScannerTone(type = "success") {
+  if (!scannerSoundEnabled) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    if (type === "success") {
+      // 2-tone bright chord (D5 587.33Hz -> A5 880Hz)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = "sine";
+      osc2.type = "sine";
+      osc1.frequency.setValueAtTime(587.33, now);
+      osc2.frequency.setValueAtTime(880, now + 0.08);
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.12);
+      osc2.start(now + 0.08);
+      osc2.stop(now + 0.35);
+    } else if (type === "warning") {
+      // Dual lower tone for warning / already checked in
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(330, now + 0.12);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.32);
+    } else {
+      // Error buzz tone
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(220, now);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+  } catch (err) {
+    console.log("Audio chime note:", err);
+  }
+}
+
+function updateGateScannerStats() {
+  const total = applicantsCache.length;
+  const attended = applicantsCache.filter((a) => a.status === "attended").length;
+  const remaining = Math.max(0, total - attended);
+  const pct = total > 0 ? Math.round((attended / total) * 100) : 0;
+
+  const totalEl = document.getElementById("gate-stat-total");
+  const attendedEl = document.getElementById("gate-stat-attended");
+  const remainingEl = document.getElementById("gate-stat-remaining");
+  const pctEl = document.getElementById("gate-stat-pct");
+  const barEl = document.getElementById("gate-stat-bar");
+
+  if (totalEl) totalEl.textContent = total;
+  if (attendedEl) attendedEl.textContent = attended;
+  if (remainingEl) remainingEl.textContent = remaining;
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (barEl) barEl.style.width = `${pct}%`;
+}
+
+async function populateCameraDevices() {
+  const select = document.getElementById("scanner-camera-select");
+  if (!select || typeof Html5Qrcode === "undefined") return;
+  try {
+    const devices = await Html5Qrcode.getCameras();
+    if (devices && devices.length) {
+      select.innerHTML = "";
+      devices.forEach((dev, idx) => {
+        const opt = document.createElement("option");
+        opt.value = dev.id;
+        opt.text = dev.label || `Camera ${idx + 1}`;
+        if (/back|rear|environment/i.test(dev.label)) {
+          opt.selected = true;
+          scannerCurrentCameraId = dev.id;
+        }
+        select.appendChild(opt);
+      });
+      if (!scannerCurrentCameraId) {
+        scannerCurrentCameraId = devices[0].id;
+      }
+    } else {
+      select.innerHTML = `<option value="">No cameras detected</option>`;
+    }
+  } catch (err) {
+    console.warn("Camera enumeration error:", err);
+    select.innerHTML = `<option value="">Default Environment Camera</option>`;
+  }
+}
+
+async function startCameraScanner(specificCameraId) {
+  if (typeof Html5Qrcode === "undefined") {
+    alert("QR scanner library is loading. Please try again in a moment.");
+    return;
+  }
+  const idlePlaceholder = document.getElementById("scanner-idle-placeholder");
+  const hudReticle = document.getElementById("scanner-hud-reticle");
+  const stopBtn = document.getElementById("scanner-stop-btn");
+
+  if (!html5QrScannerInstance) {
+    html5QrScannerInstance = new Html5Qrcode("qr-reader-container");
+  }
+
+  const cameraId = specificCameraId || scannerCurrentCameraId || { facingMode: "environment" };
+
+  try {
+    await html5QrScannerInstance.start(
+      cameraId,
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.333333
+      },
+      (decodedText) => {
+        processCheckin(decodedText, "camera");
+      },
+      () => {
+        // frame scan skip
+      }
+    );
+
+    isScannerActive = true;
+    if (idlePlaceholder) idlePlaceholder.classList.add("hidden");
+    if (hudReticle) {
+      hudReticle.classList.remove("hidden");
+      hudReticle.classList.add("flex");
+    }
+    if (stopBtn) stopBtn.classList.remove("hidden");
+  } catch (err) {
+    console.error("Camera start error:", err);
+    alert("Unable to access camera: " + (err.message || err));
+  }
+}
+
+async function stopCameraScanner() {
+  if (html5QrScannerInstance && isScannerActive) {
+    try {
+      await html5QrScannerInstance.stop();
+    } catch (e) {
+      console.warn("Scanner stop:", e);
+    }
+    isScannerActive = false;
+  }
+  const idlePlaceholder = document.getElementById("scanner-idle-placeholder");
+  const hudReticle = document.getElementById("scanner-hud-reticle");
+  const stopBtn = document.getElementById("scanner-stop-btn");
+
+  if (idlePlaceholder) idlePlaceholder.classList.remove("hidden");
+  if (hudReticle) {
+    hudReticle.classList.add("hidden");
+    hudReticle.classList.remove("flex");
+  }
+  if (stopBtn) stopBtn.classList.add("hidden");
+}
+
+function onScannerTabOpened() {
+  updateGateScannerStats();
+  populateCameraDevices();
+}
+
+function onScannerTabClosed() {
+  if (isScannerActive) {
+    stopCameraScanner();
+  }
+}
+
+async function processCheckin(payloadString, source = "camera") {
+  if (!payloadString) return;
+  const rawText = String(payloadString).trim();
+
+  // Rate-limiting debounce for camera scans
+  if (source === "camera" && rawText === lastScannedPayload && Date.now() - scannerCooldownTimer < 2500) {
+    return;
+  }
+  scannerCooldownTimer = Date.now();
+  lastScannedPayload = rawText;
+
+  // 1. Parse payload to extract identifiers: email, code, id, name
+  let targetEmail = "";
+  let targetPassCode = "";
+  let targetId = "";
+
+  // Try parsing JSON
+  if (rawText.startsWith("{") && rawText.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(rawText);
+      targetEmail = (parsed.email || "").trim().toLowerCase();
+      targetPassCode = (parsed.code || parsed.pass || "").trim().toUpperCase();
+      targetId = (parsed.id || "").trim();
+    } catch (e) {}
+  }
+
+  // If pipe-delimited SHIFT2026|email|code
+  if (!targetEmail && rawText.includes("|")) {
+    const parts = rawText.split("|").map((p) => p.trim());
+    for (const part of parts) {
+      if (part.includes("@")) targetEmail = part.toLowerCase();
+      else if (part.toUpperCase().startsWith("SHFT-")) targetPassCode = part.toUpperCase();
+    }
+  }
+
+  // If contains @, extract email
+  if (!targetEmail && rawText.includes("@")) {
+    const emailMatch = rawText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) targetEmail = emailMatch[0].toLowerCase();
+  }
+
+  // If starts with SHFT-
+  if (!targetPassCode && /SHFT-[A-Z0-9-]+/i.test(rawText)) {
+    const codeMatch = rawText.match(/SHFT-[A-Z0-9-]+/i);
+    if (codeMatch) targetPassCode = codeMatch[0].toUpperCase();
+  }
+
+  // If is UUID
+  if (!targetId && isUuid(rawText)) {
+    targetId = rawText;
+  }
+
+  // 2. Find participant in applicantsCache
+  let found = null;
+
+  if (targetEmail) {
+    found = applicantsCache.find((a) => (a.email || "").toLowerCase() === targetEmail);
+  }
+  if (!found && targetId) {
+    found = applicantsCache.find((a) => a.id === targetId);
+  }
+  if (!found && targetPassCode) {
+    found = applicantsCache.find((a) => (a.pass_code || "").toUpperCase() === targetPassCode);
+  }
+  if (!found && rawText.length > 2) {
+    const lower = rawText.toLowerCase();
+    found = applicantsCache.find(
+      (a) =>
+        (a.full_name || "").toLowerCase() === lower ||
+        (a.email || "").toLowerCase() === lower ||
+        (a.phone || "").replace(/\s+/g, "") === lower.replace(/\s+/g, "")
+    );
+  }
+
+  // 3. Fallback: query Supabase if not found in local cache
+  if (!found && supabaseClient) {
+    try {
+      let query = supabaseClient.from("applicants").select("*");
+      if (targetEmail) {
+        query = query.ilike("email", targetEmail);
+      } else if (targetId && isUuid(targetId)) {
+        query = query.eq("id", targetId);
+      } else {
+        query = query.or(`email.ilike.%${rawText}%,full_name.ilike.%${rawText}%`);
+      }
+      const { data, error } = await query.limit(1);
+      if (!error && Array.isArray(data) && data.length > 0) {
+        found = data[0];
+        if (!applicantsCache.some((a) => a.id === found.id)) {
+          applicantsCache.unshift(found);
+        }
+      }
+    } catch (e) {
+      console.warn("DB lookup error:", e);
+    }
+  }
+
+  // 4. Handle Result
+  if (!found) {
+    playScannerTone("error");
+    renderScannerResult({
+      type: "not_found",
+      rawText: rawText
+    });
+    return;
+  }
+
+  const isAlreadyAttended = found.status === "attended";
+  const nowIso = new Date().toISOString();
+  const timeFormatted = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  if (isAlreadyAttended) {
+    playScannerTone("warning");
+    renderScannerResult({
+      type: "already_attended",
+      applicant: found,
+      time: found.checked_in_at ? new Date(found.checked_in_at).toLocaleTimeString() : "Earlier Today"
+    });
+  } else {
+    // Mark as ATTENDED
+    found.status = "attended";
+    found.checked_in_at = nowIso;
+
+    // Save to database
+    if (supabaseClient && isUuid(found.id)) {
+      try {
+        const { error } = await supabaseClient.from("applicants").update({ status: "attended", checked_in_at: nowIso }).eq("id", found.id);
+        if (error) {
+          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
+        }
+      } catch (err) {
+        try {
+          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
+        } catch (e) {}
+      }
+    }
+
+    playScannerTone("success");
+
+    // Add to session history
+    gateRecentCheckins.unshift({
+      applicant: found,
+      timeStr: timeFormatted,
+      timestamp: Date.now()
+    });
+    renderGateHistory();
+
+    // Render result card
+    renderScannerResult({
+      type: "success",
+      applicant: found,
+      time: timeFormatted
+    });
+
+    // Refresh dashboards & lists
+    updateMetricsDashboard();
+    updateGateScannerStats();
+    renderApplicantsTable();
+  }
+}
+
+function renderScannerResult(info) {
+  const resultCard = document.getElementById("scanner-result-card");
+  const resultHeader = document.getElementById("scanner-result-header");
+  const resultBody = document.getElementById("scanner-result-body");
+  if (!resultCard || !resultHeader || !resultBody) return;
+
+  if (info.type === "success") {
+    resultCard.className = "bg-surface-card border-2 border-primary-container rounded-2xl p-5 flex flex-col gap-4 shadow-[0_0_30px_rgba(159,213,75,0.25)] transition-all duration-300";
+    resultHeader.innerHTML = `
+      <div class="flex items-center justify-between w-full">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-container text-on-primary shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          <span>CHECKED IN / PRESENT</span>
+        </span>
+        <span class="font-label-code text-xs text-primary-container font-bold">${info.time}</span>
+      </div>
+    `;
+    const a = info.applicant;
+    resultBody.innerHTML = `
+      <div class="flex flex-col gap-3 w-full text-left">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex flex-col">
+            <span class="font-headline-sm text-xl font-extrabold text-text-primary tracking-tight">${escapeHtml(a.full_name)}</span>
+            <span class="font-body-sm text-xs text-primary-container font-medium">${escapeHtml(a.faculty || "")} ${a.university ? "· " + escapeHtml(a.university) : ""}</span>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-surface-container font-label-code text-[11px] text-text-muted border border-surface-border">VERIFIED PASS</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-surface-container-lowest border border-surface-border font-label-code text-xs">
+          <div>
+            <span class="text-text-muted block text-[10px] uppercase">Email</span>
+            <span class="text-secondary truncate block">${escapeHtml(a.email)}</span>
+          </div>
+          <div>
+            <span class="text-text-muted block text-[10px] uppercase">Phone</span>
+            <span class="text-text-primary block">${escapeHtml(a.phone || "—")}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-text-muted text-xs font-body-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px] text-primary-container">badge</span>
+            Full Summit Access Credential
+          </span>
+          <button type="button" class="scanner-undo-action-btn text-xs font-label-code text-text-muted hover:text-error hover:underline transition-colors" data-id="${a.id}">
+            Undo Check-in
+          </button>
+        </div>
+      </div>
+    `;
+    const undoBtn = resultBody.querySelector(".scanner-undo-action-btn");
+    if (undoBtn) {
+      undoBtn.addEventListener("click", () => undoCheckin(a.id));
+    }
+  } else if (info.type === "already_attended") {
+    resultCard.className = "bg-surface-card border-2 border-amber-500/70 rounded-2xl p-5 flex flex-col gap-4 shadow-[0_0_24px_rgba(245,158,11,0.2)] transition-all duration-300";
+    resultHeader.innerHTML = `
+      <div class="flex items-center justify-between w-full">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900">
+          <span class="material-symbols-outlined text-[16px]">warning</span>
+          <span>ALREADY CHECKED IN</span>
+        </span>
+        <span class="font-label-code text-xs text-amber-400 font-bold">First at: ${info.time}</span>
+      </div>
+    `;
+    const a = info.applicant;
+    resultBody.innerHTML = `
+      <div class="flex flex-col gap-3 w-full text-left">
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-lg font-bold text-text-primary">${escapeHtml(a.full_name)}</span>
+          <span class="font-body-sm text-xs text-amber-300">This attendee was already admitted to the summit. Please check badge to prevent duplicate pass usage.</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-surface-container-lowest border border-surface-border font-label-code text-xs">
+          <div><span class="text-text-muted block text-[10px]">EMAIL</span><span class="text-secondary truncate block">${escapeHtml(a.email)}</span></div>
+          <div><span class="text-text-muted block text-[10px]">INSTITUTION</span><span class="text-secondary truncate block">${escapeHtml(a.university || "—")}</span></div>
+        </div>
+        <div class="flex items-center justify-end">
+          <button type="button" class="scanner-undo-action-btn text-xs font-label-code text-rose-400 hover:underline transition-colors" data-id="${a.id}">
+            Reset Attendance / Mark Not Arrived
+          </button>
+        </div>
+      </div>
+    `;
+    const undoBtn = resultBody.querySelector(".scanner-undo-action-btn");
+    if (undoBtn) {
+      undoBtn.addEventListener("click", () => undoCheckin(a.id));
+    }
+  } else if (info.type === "not_found") {
+    resultCard.className = "bg-surface-card border-2 border-rose-500/70 rounded-2xl p-5 flex flex-col gap-4 shadow-[0_0_24px_rgba(244,63,94,0.2)] transition-all duration-300";
+    resultHeader.innerHTML = `
+      <div class="flex items-center justify-between w-full">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white">
+          <span class="material-symbols-outlined text-[16px]">cancel</span>
+          <span>TICKET NOT FOUND</span>
+        </span>
+        <span class="font-label-code text-xs text-rose-400">Database Search Failed</span>
+      </div>
+    `;
+    resultBody.innerHTML = `
+      <div class="flex flex-col gap-2 w-full text-left">
+        <span class="font-headline-sm text-base font-bold text-text-primary">No Matching Registrant Found</span>
+        <p class="font-body-sm text-xs text-text-muted">The scanned code does not match any registered attendee in your database.</p>
+        <div class="p-2.5 rounded-xl bg-surface-container-lowest border border-surface-border font-label-code text-xs text-secondary break-all">
+          <span class="text-text-muted text-[10px] block uppercase">Scanned Payload:</span>
+          ${escapeHtml(info.rawText)}
+        </div>
+      </div>
+    `;
+  }
+}
+
+async function undoCheckin(applicantId) {
+  const target = applicantsCache.find((a) => a.id === applicantId);
+  if (!target) return;
+  target.status = "registered";
+  target.checked_in_at = null;
+
+  if (supabaseClient && isUuid(applicantId)) {
+    try {
+      await supabaseClient.from("applicants").update({ status: "registered", checked_in_at: null }).eq("id", applicantId);
+    } catch (e) {
+      try {
+        await supabaseClient.from("applicants").update({ status: "registered" }).eq("id", applicantId);
+      } catch (e2) {}
+    }
+  }
+
+  // Remove from recent check-ins
+  gateRecentCheckins = gateRecentCheckins.filter((c) => c.applicant.id !== applicantId);
+  renderGateHistory();
+  updateMetricsDashboard();
+  updateGateScannerStats();
+  renderApplicantsTable();
+
+  // Reset result card to neutral
+  const resultCard = document.getElementById("scanner-result-card");
+  const resultHeader = document.getElementById("scanner-result-header");
+  const resultBody = document.getElementById("scanner-result-body");
+  if (resultCard && resultHeader && resultBody) {
+    resultCard.className = "bg-surface-card border border-surface-border rounded-2xl p-5 flex flex-col gap-3 shadow-sm transition-all duration-300";
+    resultHeader.innerHTML = `
+      <span class="material-symbols-outlined text-[20px] text-text-muted">info</span>
+      <span class="font-label-code text-xs uppercase tracking-wider font-bold text-text-muted">Gate Status: Reverted</span>
+    `;
+    resultBody.innerHTML = `
+      <div class="py-4 text-center font-body-sm text-xs text-text-muted">
+        Attendee <strong>${escapeHtml(target.full_name)}</strong> has been marked as Not Arrived.
+      </div>
+    `;
+  }
+}
+
+function renderGateHistory() {
+  const container = document.getElementById("scanner-history-list");
+  if (!container) return;
+  if (gateRecentCheckins.length === 0) {
+    container.innerHTML = `<div class="py-8 text-center text-text-muted font-body-sm text-xs">No check-ins in this session yet.</div>`;
+    return;
+  }
+  container.innerHTML = gateRecentCheckins
+    .map((item) => {
+      const a = item.applicant;
+      return `
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container/60 hover:bg-surface-container border border-surface-border/50 text-xs transition-colors">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary font-bold flex items-center justify-center text-[10px] shrink-0 shadow-sm">
+            ${initials(a.full_name)}
+          </div>
+          <div class="flex flex-col truncate">
+            <span class="font-bold text-text-primary truncate">${escapeHtml(a.full_name)}</span>
+            <span class="text-[11px] text-text-muted truncate">${escapeHtml(a.university || a.email)}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="font-label-code text-[11px] text-primary-container font-bold">${item.timeStr}</span>
+          <button type="button" class="history-undo-btn text-text-muted hover:text-error p-1 rounded transition-colors" data-id="${a.id}" title="Undo check-in">
+            <span class="material-symbols-outlined text-[16px]">undo</span>
+          </button>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  container.querySelectorAll(".history-undo-btn").forEach((btn) => {
+    btn.addEventListener("click", () => undoCheckin(btn.dataset.id));
+  });
+}
+
+function exportAttendanceCsv() {
+  if (applicantsCache.length === 0) {
+    alert("No attendees registered to export.");
+    return;
+  }
+  const headers = ["Full Name", "Email", "Phone", "University", "Faculty", "Attendance Status", "Checked In Time", "Registered Date"];
+  const rows = applicantsCache.map((a) => [
+    `"${(a.full_name || "").replace(/"/g, '""')}"`,
+    `"${(a.email || "").replace(/"/g, '""')}"`,
+    `"${(a.phone || "").replace(/"/g, '""')}"`,
+    `"${(a.university || "").replace(/"/g, '""')}"`,
+    `"${(a.faculty || "").replace(/"/g, '""')}"`,
+    `"${a.status === "attended" ? "PRESENT" : "NOT ARRIVED"}"`,
+    `"${a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : ""}"`,
+    `"${new Date(a.created_at).toLocaleString()}"`
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SHIFT-2026-Attendance-Report-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function initGateScanner() {
+  const startBtn = document.getElementById("scanner-start-btn");
+  const stopBtn = document.getElementById("scanner-stop-btn");
+  const cameraSelect = document.getElementById("scanner-camera-select");
+  const soundToggle = document.getElementById("scanner-sound-toggle");
+  const soundIcon = document.getElementById("scanner-sound-icon");
+  const soundLabel = document.getElementById("scanner-sound-label");
+  const fileInput = document.getElementById("scanner-file-input");
+  const manualForm = document.getElementById("scanner-manual-form");
+  const manualInput = document.getElementById("scanner-manual-input");
+  const suggestionsBox = document.getElementById("scanner-suggestions");
+  const clearHistoryBtn = document.getElementById("scanner-clear-history-btn");
+  const exportBtn = document.getElementById("scanner-export-attendance-btn");
+  const jumpBtn = document.getElementById("btn-jump-to-scanner");
+
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      startCameraScanner(cameraSelect?.value);
+    });
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener("click", () => {
+      stopCameraScanner();
+    });
+  }
+
+  if (cameraSelect) {
+    cameraSelect.addEventListener("change", (e) => {
+      scannerCurrentCameraId = e.target.value;
+      if (isScannerActive) {
+        stopCameraScanner().then(() => startCameraScanner(scannerCurrentCameraId));
+      }
+    });
+  }
+
+  if (soundToggle) {
+    soundToggle.addEventListener("click", () => {
+      scannerSoundEnabled = !scannerSoundEnabled;
+      if (soundIcon) soundIcon.textContent = scannerSoundEnabled ? "volume_up" : "volume_off";
+      if (soundLabel) soundLabel.textContent = scannerSoundEnabled ? "Sound ON" : "Sound Muted";
+      soundToggle.classList.toggle("text-text-muted", !scannerSoundEnabled);
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!html5QrScannerInstance) {
+        html5QrScannerInstance = new Html5Qrcode("qr-reader-container");
+      }
+      try {
+        const decodedText = await html5QrScannerInstance.scanFile(file, true);
+        processCheckin(decodedText, "file");
+      } catch (err) {
+        alert("Could not detect a QR code in that image: " + (err.message || err));
+      }
+      fileInput.value = "";
+    });
+  }
+
+  if (manualForm && manualInput) {
+    manualForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = manualInput.value.trim();
+      if (!val) return;
+      if (suggestionsBox) suggestionsBox.classList.add("hidden");
+      processCheckin(val, "manual");
+      manualInput.value = "";
+    });
+
+    // Autocomplete live search
+    manualInput.addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q || q.length < 2 || !suggestionsBox) {
+        if (suggestionsBox) suggestionsBox.classList.add("hidden");
+        return;
+      }
+      const matches = applicantsCache
+        .filter(
+          (a) =>
+            (a.full_name || "").toLowerCase().includes(q) ||
+            (a.email || "").toLowerCase().includes(q) ||
+            (a.phone || "").includes(q)
+        )
+        .slice(0, 5);
+
+      if (matches.length === 0) {
+        suggestionsBox.classList.add("hidden");
+        return;
+      }
+
+      suggestionsBox.innerHTML = matches
+        .map(
+          (m) => `
+        <div class="scanner-suggestion-item p-2.5 hover:bg-surface-container flex items-center justify-between cursor-pointer border-b border-surface-border/40 text-xs transition-colors" data-email="${escapeHtml(m.email)}">
+          <div class="flex flex-col truncate">
+            <span class="font-bold text-text-primary">${escapeHtml(m.full_name)}</span>
+            <span class="text-text-muted text-[11px] truncate">${escapeHtml(m.email)}</span>
+          </div>
+          <span class="text-[10px] font-label-code uppercase font-bold px-2 py-0.5 rounded ${m.status === 'attended' ? 'bg-primary-container text-on-primary' : 'bg-surface-container text-text-muted'}">
+            ${m.status === 'attended' ? 'Present' : 'Pending'}
+          </span>
+        </div>
+      `
+        )
+        .join("");
+
+      suggestionsBox.classList.remove("hidden");
+
+      suggestionsBox.querySelectorAll(".scanner-suggestion-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const email = item.dataset.email;
+          suggestionsBox.classList.add("hidden");
+          manualInput.value = "";
+          processCheckin(email, "manual");
+        });
+      });
+    });
+
+    // Close suggestions on outside click
+    document.addEventListener("click", (e) => {
+      if (suggestionsBox && !manualForm.contains(e.target)) {
+        suggestionsBox.classList.add("hidden");
+      }
+    });
+  }
+
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", () => {
+      gateRecentCheckins = [];
+      renderGateHistory();
+    });
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportAttendanceCsv);
+  }
+
+  if (jumpBtn) {
+    jumpBtn.addEventListener("click", () => {
+      const scannerTabBtn = document.querySelector('.tab-btn[data-tab="scanner"]');
+      if (scannerTabBtn) scannerTabBtn.click();
+      setTimeout(() => {
+        startCameraScanner();
+      }, 200);
+    });
+  }
+
+  updateGateScannerStats();
+}
+
 // ---------------------------------------------------------------------------
 // LOAD EVERYTHING
 // ---------------------------------------------------------------------------
@@ -1515,6 +2280,7 @@ function loadAll() {
   loadApplicants();
   loadPartnerRequests();
   initApplicantFilters();
+  initGateScanner();
 }
 
 checkAuth();

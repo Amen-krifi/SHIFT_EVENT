@@ -457,16 +457,16 @@ function generatePassCanvas(name, org, passId) {
   canvas.height = 680;
   const ctx = canvas.getContext("2d");
 
-  // Background gradient
+  // Background gradient based on brand #0F172A
   const bg = ctx.createLinearGradient(0, 0, 1200, 680);
-  bg.addColorStop(0, "#0b0e14");
-  bg.addColorStop(0.4, "#131b26");
-  bg.addColorStop(1, "#07090d");
+  bg.addColorStop(0, "#0F172A");
+  bg.addColorStop(0.4, "#1E293B");
+  bg.addColorStop(1, "#0B1120");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 1200, 680);
 
   // Subtle tech grid lines
-  ctx.strokeStyle = "rgba(205, 241, 72, 0.05)";
+  ctx.strokeStyle = "rgba(159, 213, 75, 0.06)";
   ctx.lineWidth = 1;
   for (let x = 0; x < 1200; x += 40) {
     ctx.beginPath();
@@ -482,12 +482,12 @@ function generatePassCanvas(name, org, passId) {
   }
 
   // Neon frame
-  ctx.strokeStyle = "#cdf148";
+  ctx.strokeStyle = "#9FD54B";
   ctx.lineWidth = 3;
   ctx.strokeRect(28, 28, 1144, 624);
 
   // Corner highlights
-  ctx.fillStyle = "#cdf148";
+  ctx.fillStyle = "#9FD54B";
   const cornerSize = 16;
   ctx.fillRect(28, 28, cornerSize, 4);
   ctx.fillRect(28, 28, 4, cornerSize);
@@ -500,30 +500,30 @@ function generatePassCanvas(name, org, passId) {
 
   // Glow Accent
   const glow = ctx.createRadialGradient(1000, 100, 10, 1000, 100, 320);
-  glow.addColorStop(0, "rgba(205, 241, 72, 0.22)");
-  glow.addColorStop(1, "rgba(205, 241, 72, 0)");
+  glow.addColorStop(0, "rgba(159, 213, 75, 0.22)");
+  glow.addColorStop(1, "rgba(159, 213, 75, 0)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, 1200, 680);
 
   // Brand Name
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "800 52px 'Plus Jakarta Sans', system-ui, sans-serif";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "800 52px 'Poppins', system-ui, sans-serif";
   ctx.fillText("SHIFT", 70, 110);
-  ctx.fillStyle = "#cdf148";
+  ctx.fillStyle = "#9FD54B";
   ctx.fillText(".", 225, 110);
 
-  ctx.fillStyle = "#9CA3AF";
-  ctx.font = "600 15px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#94A3B8";
+  ctx.font = "600 15px 'Poppins', monospace, sans-serif";
   ctx.fillText("EXECUTIVE AI SUMMIT · AIESEC IN BARDO", 70, 142);
 
   // Pass Code pill badge
-  ctx.fillStyle = "rgba(205, 241, 72, 0.15)";
+  ctx.fillStyle = "rgba(159, 213, 75, 0.15)";
   ctx.fillRect(830, 75, 280, 48);
-  ctx.strokeStyle = "rgba(205, 241, 72, 0.5)";
+  ctx.strokeStyle = "rgba(159, 213, 75, 0.5)";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(830, 75, 280, 48);
 
-  ctx.fillStyle = "#cdf148";
+  ctx.fillStyle = "#9FD54B";
   ctx.font = "700 15px 'JetBrains Mono', monospace";
   ctx.fillText("PASS: " + (passId || "SHFT-DELEGATE"), 850, 105);
 
@@ -536,51 +536,74 @@ function generatePassCanvas(name, org, passId) {
   ctx.stroke();
 
   // Credential Subhead
-  ctx.fillStyle = "#cdf148";
-  ctx.font = "600 16px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#9FD54B";
+  ctx.font = "600 15px 'Poppins', sans-serif";
   ctx.fillText("OFFICIAL DELEGATE CREDENTIAL", 70, 235);
 
   // Delegate Name
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "800 54px 'Plus Jakarta Sans', system-ui, sans-serif";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "800 54px 'Poppins', system-ui, sans-serif";
   const safeName = (name || "Delegate").toUpperCase();
   ctx.fillText(safeName, 70, 310);
 
   // University / Affiliation
-  ctx.fillStyle = "#b2d42b";
-  ctx.font = "600 22px 'Plus Jakarta Sans', system-ui, sans-serif";
+  ctx.fillStyle = "#9FD54B";
+  ctx.font = "600 22px 'Poppins', system-ui, sans-serif";
   ctx.fillText(org || "Participant · Summit General Assembly", 70, 355);
 
   // Metadata Card inside pass
-  ctx.fillStyle = "rgba(18, 23, 33, 0.85)";
+  ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
   ctx.fillRect(70, 415, 1040, 115);
   ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
   ctx.strokeRect(70, 415, 1040, 115);
 
-  ctx.fillStyle = "#9CA3AF";
+  // Official Scannable QR Code on Pass
+  const qrSource = document.querySelector("#pass-qrcode-box canvas") || document.querySelector("#pass-qrcode-box img");
+  if (qrSource) {
+    try {
+      // White badge card for high-contrast scanning
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(920, 205, 190, 195);
+      ctx.strokeStyle = "#9FD54B";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(920, 205, 190, 195);
+
+      ctx.drawImage(qrSource, 935, 215, 160, 160);
+
+      ctx.fillStyle = "#0F172A";
+      ctx.font = "700 10px 'Poppins', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("GATE SCAN QR", 1015, 392);
+      ctx.textAlign = "left";
+    } catch (qrDrawErr) {
+      console.warn("Could not draw QR on pass canvas:", qrDrawErr);
+    }
+  }
+
+  ctx.fillStyle = "#94A3B8";
   ctx.font = "600 13px 'JetBrains Mono', monospace";
   ctx.fillText("DATE", 100, 455);
   ctx.fillText("VENUE", 360, 455);
   ctx.fillText("ACCESS LEVEL", 680, 455);
   ctx.fillText("STATUS", 920, 455);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 18px 'Plus Jakarta Sans', system-ui, sans-serif";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "700 18px 'Poppins', system-ui, sans-serif";
   ctx.fillText("28 NOV 2026", 100, 495);
   ctx.fillText("TUNIS, TUNISIA", 360, 495);
   ctx.fillText("FULL DELEGATE", 680, 495);
 
-  ctx.fillStyle = "#cdf148";
+  ctx.fillStyle = "#9FD54B";
   ctx.fillText("CONFIRMED", 920, 495);
 
   // Footer bar & barcode
-  ctx.fillStyle = "#9CA3AF";
-  ctx.font = "500 13px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#94A3B8";
+  ctx.font = "500 13px 'Poppins', sans-serif";
   ctx.fillText("DATABASE VERIFIED · AIESEC IN BARDO SUMMIT GOVERNANCE", 70, 600);
 
   for (let i = 0; i < 32; i++) {
     const barW = i % 3 === 0 ? 4 : i % 2 === 0 ? 2 : 1;
-    ctx.fillStyle = i % 5 === 0 ? "#cdf148" : "rgba(255, 255, 255, 0.6)";
+    ctx.fillStyle = i % 5 === 0 ? "#9FD54B" : "rgba(255, 255, 255, 0.6)";
     ctx.fillRect(940 + i * 5, 580, barW, 26);
   }
 
@@ -727,9 +750,40 @@ function initRegisterForm() {
     if (passName) passName.textContent = payload.full_name || "Delegate Name";
     const orgText = [payload.faculty, payload.university].filter(Boolean).join(" · ") || "Executive Delegate";
     if (passOrg) passOrg.textContent = orgText;
+    
+    let currentPassCode = "SHFT-2026-DELEGATE";
     if (passCode) {
       const randHex = Math.random().toString(36).substring(2, 6).toUpperCase();
-      passCode.textContent = `SHFT-2026-${randHex}`;
+      currentPassCode = `SHFT-2026-${randHex}`;
+      passCode.textContent = currentPassCode;
+    }
+
+    // Generate Official Scannable QR Code
+    const qrBox = document.getElementById("pass-qrcode-box");
+    if (qrBox) {
+      qrBox.innerHTML = "";
+      const qrPayload = JSON.stringify({
+        event: "SHIFT2026",
+        email: payload.email,
+        name: payload.full_name,
+        code: currentPassCode,
+        ts: Date.now()
+      });
+
+      if (typeof QRCode !== "undefined") {
+        try {
+          new QRCode(qrBox, {
+            text: qrPayload,
+            width: 96,
+            height: 96,
+            colorDark: "#0F172A",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } catch (qrErr) {
+          console.warn("QR code generation err:", qrErr);
+        }
+      }
     }
 
     // Open the confirmation popup window confirming they are added to the database
@@ -956,7 +1010,7 @@ function initAgenda() {
       btn.setAttribute("aria-selected", isSelected ? "true" : "false");
       if (isSelected) {
         btn.className =
-          "agenda-filter-btn px-4 py-2 rounded-lg font-label-code text-xs uppercase tracking-wider transition-all duration-200 bg-primary-container text-on-primary font-bold shadow-[0_0_12px_rgba(205,241,72,0.3)]";
+          "agenda-filter-btn px-4 py-2 rounded-lg font-label-code text-xs uppercase tracking-wider transition-all duration-200 bg-primary-container text-on-primary font-bold shadow-[0_0_12px_rgba(159,213,75,0.3)]";
       } else {
         btn.className =
           "agenda-filter-btn px-4 py-2 rounded-lg font-label-code text-xs uppercase tracking-wider transition-all duration-200 text-text-muted hover:text-text-primary hover:bg-surface-container";
