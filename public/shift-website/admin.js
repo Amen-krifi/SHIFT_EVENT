@@ -1637,12 +1637,114 @@ function updateGateScannerStats() {
 
 async function populateCameraDevices() {
   const select = document.getElementById("scanner-camera-select");
-  if (!select || typeof Html5Qrcode === "undefined") return;
+  if (!select) return;
+  // Initialize with standard options without triggering permission requests
+  select.innerHTML = `
+    <option value="environment" selected>Rear / Environment Camera</option>
+    <option value="user">Front / User Camera</option>
+  `;
+}
+
+async function startCameraScanner(specificCameraId) {
+  if (typeof Html5Qrcode === "undefined") {
+    renderScannerResult({
+      type: "info_notice",
+      title: "QR Scanner Loading",
+      message: "The QR code scanner library is still initializing. Please try again in a few seconds."
+    });
+    return;
+  }
+  const idlePlaceholder = document.getElementById("scanner-idle-placeholder");
+  const hudReticle = document.getElementById("scanner-hud-reticle");
+  const stopBtn = document.getElementById("scanner-stop-btn");
+  const permDeniedBox = document.getElementById("scanner-permission-denied");
+
+  if (permDeniedBox) permDeniedBox.classList.add("hidden");
+
+  // Step 1: Explicitly request browser camera permission with a simple, standard userMedia call
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (idlePlaceholder) idlePlaceholder.classList.add("hidden");
+    if (permDeniedBox) {
+      const permTitle = document.getElementById("scanner-perm-title");
+      const permDesc = document.getElementById("scanner-perm-desc");
+      if (permTitle) permTitle.textContent = "Camera API Not Supported";
+      if (permDesc) permDesc.textContent = "Your browser does not support the camera API. Please use a modern browser or upload QR pass images directly.";
+      permDeniedBox.classList.remove("hidden");
+    }
+    return;
+  }
+
+  let probeStream = null;
   try {
-    const devices = await Html5Qrcode.getCameras();
-    if (devices && devices.length) {
+    probeStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    // Stop the probe stream immediately so hardware is freed for the scanner
+    probeStream.getTracks().forEach((track) => track.stop());
+  } catch (probeErr) {
+    console.warn("Camera probe permission result:", probeErr?.name, probeErr?.message);
+    isScannerActive = false;
+
+    if (hudReticle) {
+      hudReticle.classList.add("hidden");
+      hudReticle.classList.remove("flex");
+    }
+    if (stopBtn) stopBtn.classList.add("hidden");
+
+    const errName = probeErr?.name || "";
+    const errMsg = String(probeErr?.message || "").toLowerCase();
+    const isPermissionError =
+      errName === "NotAllowedError" ||
+      errName === "PermissionDeniedError" ||
+      errMsg.includes("permission denied") ||
+      errMsg.includes("not allowed");
+
+    const isNotFoundError =
+      errName === "NotFoundError" ||
+      errName === "DevicesNotFoundError" ||
+      errMsg.includes("no camera") ||
+      errMsg.includes("device not found");
+
+    if (idlePlaceholder) idlePlaceholder.classList.add("hidden");
+    if (permDeniedBox) {
+      const permTitle = document.getElementById("scanner-perm-title");
+      const permDesc = document.getElementById("scanner-perm-desc");
+      const permIcon = document.getElementById("scanner-perm-icon");
+
+      if (isNotFoundError) {
+        if (permTitle) permTitle.textContent = "No Camera Device Found";
+        if (permDesc) permDesc.textContent = "No physical camera or webcam was detected on this device. You can scan attendees by uploading QR badge images or using the manual search below:";
+        if (permIcon) permIcon.textContent = "no_photography";
+      } else {
+        if (permTitle) permTitle.textContent = "Camera Permission Blocked or Restricted";
+        if (permDesc) permDesc.textContent = "Your browser or preview window blocked camera access. You can click 'Open in Full Window' for top-level access, set permission in the URL bar, or use image upload / manual lookup below:";
+        if (permIcon) permIcon.textContent = "videocam_off";
+      }
+
+      permDeniedBox.classList.remove("hidden");
+    }
+
+    renderScannerResult({
+      type: "camera_error",
+      isPermission: isPermissionError,
+      errorMsg: isPermissionError
+        ? "Camera permission was not granted by your browser. Click 'Open in Full Window' above or use manual lookup."
+        : (probeErr?.message || "Could not access camera. Try uploading an image or manual search.")
+    });
+    return;
+  }
+
+  // Step 2: Now that permission has been granted, initialize the scanner
+  if (!html5QrScannerInstance) {
+    html5QrScannerInstance = new Html5Qrcode("qr-reader-container");
+  }
+
+  // Populate actual hardware cameras now that we have permission
+  let availableCameras = [];
+  try {
+    availableCameras = await Html5Qrcode.getCameras();
+    const select = document.getElementById("scanner-camera-select");
+    if (select && availableCameras && availableCameras.length > 0) {
       select.innerHTML = "";
-      devices.forEach((dev, idx) => {
+      availableCameras.forEach((dev, idx) => {
         const opt = document.createElement("option");
         opt.value = dev.id;
         opt.text = dev.label || `Camera ${idx + 1}`;
@@ -1652,36 +1754,30 @@ async function populateCameraDevices() {
         }
         select.appendChild(opt);
       });
-      if (!scannerCurrentCameraId) {
-        scannerCurrentCameraId = devices[0].id;
+      if (!scannerCurrentCameraId && availableCameras.length > 0) {
+        scannerCurrentCameraId = availableCameras[0].id;
       }
-    } else {
-      select.innerHTML = `<option value="">No cameras detected</option>`;
     }
-  } catch (err) {
-    console.warn("Camera enumeration error:", err);
-    select.innerHTML = `<option value="">Default Environment Camera</option>`;
-  }
-}
-
-async function startCameraScanner(specificCameraId) {
-  if (typeof Html5Qrcode === "undefined") {
-    alert("QR scanner library is loading. Please try again in a moment.");
-    return;
-  }
-  const idlePlaceholder = document.getElementById("scanner-idle-placeholder");
-  const hudReticle = document.getElementById("scanner-hud-reticle");
-  const stopBtn = document.getElementById("scanner-stop-btn");
-
-  if (!html5QrScannerInstance) {
-    html5QrScannerInstance = new Html5Qrcode("qr-reader-container");
+  } catch (enumErr) {
+    console.log("Device enumeration note:", enumErr);
   }
 
-  const cameraId = specificCameraId || scannerCurrentCameraId || { facingMode: "environment" };
+  // Camera target config: if we have specific camera ID from getCameras, use it; otherwise { facingMode: "environment" }
+  let targetCamera = { facingMode: "environment" };
+  const chosen = specificCameraId || scannerCurrentCameraId;
+  if (chosen) {
+    if (chosen === "environment" || chosen === "user") {
+      targetCamera = { facingMode: chosen };
+    } else {
+      targetCamera = chosen;
+    }
+  } else if (availableCameras.length > 0) {
+    targetCamera = availableCameras[0].id;
+  }
 
   try {
     await html5QrScannerInstance.start(
-      cameraId,
+      targetCamera,
       {
         fps: 10,
         qrbox: { width: 250, height: 250 },
@@ -1703,8 +1799,21 @@ async function startCameraScanner(specificCameraId) {
     }
     if (stopBtn) stopBtn.classList.remove("hidden");
   } catch (err) {
-    console.error("Camera start error:", err);
-    alert("Unable to access camera: " + (err.message || err));
+    console.warn("Html5Qrcode start error:", err?.name, err?.message);
+    isScannerActive = false;
+
+    if (hudReticle) {
+      hudReticle.classList.add("hidden");
+      hudReticle.classList.remove("flex");
+    }
+    if (stopBtn) stopBtn.classList.add("hidden");
+    if (idlePlaceholder) idlePlaceholder.classList.remove("hidden");
+
+    renderScannerResult({
+      type: "camera_error",
+      isPermission: false,
+      errorMsg: "Camera stream started with error: " + (err?.message || "Check device and try again.")
+    });
   }
 }
 
@@ -1713,14 +1822,16 @@ async function stopCameraScanner() {
     try {
       await html5QrScannerInstance.stop();
     } catch (e) {
-      console.warn("Scanner stop:", e);
+      console.warn("Scanner stop note:", e);
     }
     isScannerActive = false;
   }
   const idlePlaceholder = document.getElementById("scanner-idle-placeholder");
   const hudReticle = document.getElementById("scanner-hud-reticle");
   const stopBtn = document.getElementById("scanner-stop-btn");
+  const permDeniedBox = document.getElementById("scanner-permission-denied");
 
+  if (permDeniedBox) permDeniedBox.classList.add("hidden");
   if (idlePlaceholder) idlePlaceholder.classList.remove("hidden");
   if (hudReticle) {
     hudReticle.classList.add("hidden");
@@ -2007,6 +2118,42 @@ function renderScannerResult(info) {
         </div>
       </div>
     `;
+  } else if (info.type === "camera_error") {
+    resultCard.className = "bg-surface-card border-2 border-amber-500/60 rounded-2xl p-5 flex flex-col gap-3 shadow-[0_0_20px_rgba(245,158,11,0.15)] transition-all duration-300";
+    resultHeader.innerHTML = `
+      <div class="flex items-center justify-between w-full">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900">
+          <span class="material-symbols-outlined text-[16px]">videocam_off</span>
+          <span>Camera Standby</span>
+        </span>
+        <span class="font-label-code text-xs text-amber-400 font-bold">Access Alert</span>
+      </div>
+    `;
+    resultBody.innerHTML = `
+      <div class="flex flex-col gap-2 w-full text-left">
+        <span class="font-headline-sm text-sm font-bold text-text-primary">Camera Permissions Restricted</span>
+        <p class="font-body-sm text-xs text-text-muted leading-relaxed">${escapeHtml(info.errorMsg)}</p>
+        <div class="flex flex-wrap items-center gap-2 pt-2">
+          <label for="scanner-file-input" class="cursor-pointer px-3.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high border border-surface-border text-text-primary font-label-code text-xs uppercase transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary-container">upload_file</span>
+            <span>Upload Pass Image</span>
+          </label>
+        </div>
+      </div>
+    `;
+  } else if (info.type === "info_notice") {
+    resultCard.className = "bg-surface-card border border-surface-border rounded-2xl p-5 flex flex-col gap-3 shadow-sm transition-all duration-300";
+    resultHeader.innerHTML = `
+      <div class="flex items-center gap-2 text-primary-container">
+        <span class="material-symbols-outlined text-[20px]">info</span>
+        <span class="font-label-code text-xs uppercase tracking-wider font-bold">${escapeHtml(info.title || "Notice")}</span>
+      </div>
+    `;
+    resultBody.innerHTML = `
+      <div class="py-3 text-center font-body-sm text-xs text-text-muted">
+        ${escapeHtml(info.message || "")}
+      </div>
+    `;
   }
 }
 
@@ -2172,9 +2319,29 @@ function initGateScanner() {
         const decodedText = await html5QrScannerInstance.scanFile(file, true);
         processCheckin(decodedText, "file");
       } catch (err) {
-        alert("Could not detect a QR code in that image: " + (err.message || err));
+        renderScannerResult({
+          type: "not_found",
+          rawText: "Image QR Scan Notice: No scannable QR code was detected in this file. Please make sure the image is clear or use manual attendee search."
+        });
       }
       fileInput.value = "";
+    });
+  }
+
+  const retryBtn = document.getElementById("scanner-retry-btn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      startCameraScanner();
+    });
+  }
+
+  const focusManualBtn = document.getElementById("scanner-focus-manual-btn");
+  if (focusManualBtn) {
+    focusManualBtn.addEventListener("click", () => {
+      if (manualInput) {
+        manualInput.focus();
+        manualInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     });
   }
 

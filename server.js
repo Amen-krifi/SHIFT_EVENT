@@ -18,6 +18,12 @@ const altAgendaFilePath = path.join(altDir, 'data', 'agenda.json');
 
 app.use(express.json({ limit: '5mb' }));
 
+// Allow camera access in headers
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=*, microphone=*');
+  next();
+});
+
 // Helper to read agenda
 function getAgendaData() {
   try {

@@ -249,6 +249,10 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+          <a id="scanner-open-window-top-btn" href="/admin.html" target="_blank" class="px-3.5 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-xs uppercase font-bold hover:shadow-[0_0_12px_rgba(159,213,75,0.4)] transition-all flex items-center gap-1.5" title="Open in separate top-level window for full camera access">
+            <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+            <span>Open in Full Tab</span>
+          </a>
           <button id="scanner-sound-toggle" type="button" class="px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-surface-border text-text-primary font-label-code text-xs uppercase transition-all flex items-center gap-1.5" title="Toggle chime sound feedback on scan">
             <span class="material-symbols-outlined text-[16px] text-primary-container" id="scanner-sound-icon">volume_up</span>
             <span id="scanner-sound-label">Sound ON</span>
@@ -334,6 +338,49 @@
                   <!-- Laser sweep line -->
                   <div class="w-full h-0.5 bg-gradient-to-r from-transparent via-primary-container to-transparent shadow-[0_0_8px_rgba(159,213,75,0.9)] animate-pulse"></div>
                   <span class="absolute bottom-2 font-label-code text-[10px] text-primary-container uppercase font-bold tracking-widest bg-black/60 px-2 py-0.5 rounded">Align QR Code</span>
+                </div>
+              </div>
+
+              <!-- Permission Denied / Fallback View -->
+              <div id="scanner-permission-denied" class="absolute inset-0 flex flex-col items-center justify-center p-5 text-center bg-surface-container-lowest/98 backdrop-blur-md z-20 hidden overflow-y-auto">
+                <div class="w-12 h-12 rounded-full bg-amber-500/15 border-2 border-amber-500/50 flex items-center justify-center text-amber-400 mb-2 shadow-[0_0_20px_rgba(245,158,11,0.2)] shrink-0">
+                  <span class="material-symbols-outlined text-[26px]" id="scanner-perm-icon">videocam_off</span>
+                </div>
+                <h4 class="font-headline-sm text-base font-bold text-text-primary" id="scanner-perm-title">Camera Permission Blocked</h4>
+                <p class="font-body-sm text-xs text-text-muted max-w-sm mt-0.5 mb-2 leading-relaxed" id="scanner-perm-desc">
+                  Your browser or preview window blocked camera access.
+                </p>
+                <div class="p-3 bg-surface-container-lowest border border-surface-border rounded-xl text-left max-w-sm w-full mb-3 text-[11px] font-body-sm text-secondary space-y-1.5">
+                  <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[15px] text-primary-container shrink-0 mt-0.5">lock</span>
+                    <span>Click the <strong>lock icon (🔒)</strong> on the left side of your browser URL bar.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[15px] text-primary-container shrink-0 mt-0.5">toggle_on</span>
+                    <span>Set <strong>Camera</strong> permission to <strong>Allow</strong>.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[15px] text-primary-container shrink-0 mt-0.5">open_in_new</span>
+                    <span>If inside an embedded preview iframe, click <strong>Open in Full Window</strong> below for top-level camera access.</span>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                  <a id="scanner-open-new-window-btn" href="/admin.html" target="_blank" class="px-4 py-2 rounded-full bg-primary-container text-on-primary font-headline-sm text-xs font-bold uppercase hover:shadow-[0_0_16px_rgba(159,213,75,0.4)] transition-all flex items-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                    <span>Open in Full Window</span>
+                  </a>
+                  <button id="scanner-retry-btn" type="button" class="px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-surface-border text-text-primary font-label-code text-xs uppercase transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">refresh</span>
+                    <span>Retry Camera</span>
+                  </button>
+                  <label for="scanner-file-input" class="cursor-pointer px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-surface-border text-text-primary font-label-code text-xs uppercase transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-primary-container">upload_file</span>
+                    <span>Upload QR Image</span>
+                  </label>
+                  <button id="scanner-focus-manual-btn" type="button" class="px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-surface-border text-text-muted hover:text-white font-label-code text-xs uppercase transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">search</span>
+                    <span>Manual Search</span>
+                  </button>
                 </div>
               </div>
             </div>
