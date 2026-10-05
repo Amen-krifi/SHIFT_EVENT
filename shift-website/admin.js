@@ -1851,16 +1851,36 @@ function onScannerTabClosed() {
   }
 }
 
+let checkinInFlight = false;
+
 async function processCheckin(payloadString, source = "camera") {
   if (!payloadString) return;
   const rawText = String(payloadString).trim();
 
-  // Rate-limiting debounce for camera scans
-  if (source === "camera" && rawText === lastScannedPayload && Date.now() - scannerCooldownTimer < 2500) {
-    return;
+  if (source === "camera") {
+    const now = Date.now();
+    // Same QR still in front of the camera: keep ignoring it
+    if (rawText === lastScannedPayload && now - scannerCooldownTimer < 3000) {
+      scannerCooldownTimer = now;
+      return;
+    }
+    // A check-in is still being processed: ignore extra frames
+    if (checkinInFlight) return;
+    scannerCooldownTimer = now;
+    lastScannedPayload = rawText;
   }
-  scannerCooldownTimer = Date.now();
-  lastScannedPayload = rawText;
+
+  checkinInFlight = true;
+  try {
+    await processCheckinInner(rawText, source);
+  } finally {
+    checkinInFlight = false;
+  }
+}
+
+async function processCheckinInner(payloadString, source = "camera") {
+  if (!payloadString) return;
+  const rawText = String(payloadString).trim();
 
   // 1. Parse payload to extract identifiers: email, code, id, name
   let targetEmail = "";
