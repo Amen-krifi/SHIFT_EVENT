@@ -1989,24 +1989,42 @@ async function processCheckinInner(payloadString, source = "camera") {
       applicant: found,
       time: found.checked_in_at ? new Date(found.checked_in_at).toLocaleTimeString() : "Earlier Today"
     });
-  } else {
-    // Mark as ATTENDED
+    } else {
+    // Mark as ATTENDED and update the screen immediately
     found.status = "attended";
     found.checked_in_at = nowIso;
 
-    // Save to database
+    playScannerTone("success");
+    gateRecentCheckins.unshift({
+      applicant: found,
+      timeStr: timeFormatted,
+      timestamp: Date.now()
+    });
+    renderGateHistory();
+    renderScannerResult({ type: "success", applicant: found, time: timeFormatted });
+    updateMetricsDashboard();
+    updateGateScannerStats();
+    renderApplicantsTable();
+
+    // Save in the background; undo the check-in if the save fails
     if (supabaseClient && isUuid(found.id)) {
-      try {
-        const { error } = await supabaseClient.from("applicants").update({ status: "attended", checked_in_at: nowIso }).eq("id", found.id);
-        if (error) {
-          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
-        }
-      } catch (err) {
-        try {
-          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
-        } catch (e) {}
-      }
+      supabaseClient
+        .from("applicants")
+        .update({ status: "attended", checked_in_at: nowIso })
+        .eq("id", found.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error("Check-in save failed:", error);
+            found.status = "registered";
+            found.checked_in_at = null;
+            updateMetricsDashboard();
+            updateGateScannerStats();
+            renderApplicantsTable();
+            alert("Check-in for " + found.full_name + " was NOT saved: " + error.message);
+          }
+        });
     }
+  }
 
     playScannerTone("success");
 
