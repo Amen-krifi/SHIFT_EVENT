@@ -2023,30 +2023,7 @@ async function processCheckinInner(payloadString, source = "camera") {
             alert("Check-in for " + found.full_name + " was NOT saved: " + error.message);
           }
         });
-    }
-  }
-
-    playScannerTone("success");
-
-    // Add to session history
-    gateRecentCheckins.unshift({
-      applicant: found,
-      timeStr: timeFormatted,
-      timestamp: Date.now()
-    });
-    renderGateHistory();
-
-    // Render result card
-    renderScannerResult({
-      type: "success",
-      applicant: found,
-      time: timeFormatted
-    });
-
-    // Refresh dashboards & lists
-    updateMetricsDashboard();
-    updateGateScannerStats();
-    renderApplicantsTable();
+      }
   }
 }
 
