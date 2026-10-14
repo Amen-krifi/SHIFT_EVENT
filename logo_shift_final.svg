@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="darkCharcoalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c4c4e" />
+      <stop offset="30%" stop-color="#38383a" />
+      <stop offset="100%" stop-color="#1c1c1e" />
+    </linearGradient>
+  </defs>
+
+  <!-- Top Chevron Roof -->
+  <polygon points="
+    100,16
+    176,60
+    176,88
+    100,44
+    24,88
+    24,60
+  " fill="url(#darkCharcoalGrad)" />
+
+  <!-- Middle Geometric S Body -->
+  <polygon points="
+    24,102
+    100,58
+    176,102
+    176,134
+    124,104
+    64,138
+    176,202
+    176,166
+    100,122
+    24,166
+    24,134
+  " fill="url(#darkCharcoalGrad)" />
+
+  <!-- Bottom Chevron Base -->
+  <polygon points="
+    100,224
+    24,180
+    24,152
+    100,196
+    176,152
+    176,180
+  " fill="url(#darkCharcoalGrad)" />
+</svg>

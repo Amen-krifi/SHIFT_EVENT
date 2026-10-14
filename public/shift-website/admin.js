@@ -202,7 +202,7 @@ function fieldHtml(entityKey, field, value) {
 function openForm(entityKey, row) {
   const cfg = ENTITIES[entityKey];
   const container = document.getElementById(`form-${entityKey}`);
-  editingId[entityKey] = row ? row.id : null;
+  editingId[entityKey] = row && !String(row.id).startsWith("default-") ? row.id : null;
 
   const fieldsHtml = cfg.fields.map((f) => fieldHtml(entityKey, f, row ? row[f.key] : f.type === "checkbox" ? true : "")).join("");
 
@@ -276,33 +276,283 @@ async function saveEntity(entityKey) {
   }
 }
 
+function initials(name) {
+  if (!name) return "SH";
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+// ---------------------------------------------------------------------------
+// DEFAULT CURATED ENTITIES (Matched 1-to-1 with summit website)
+// ---------------------------------------------------------------------------
+const DEFAULT_ENTITIES = {
+  team_members: [
+    { name: "Amen Krifi", role: "Organizing Committee President", linkedin_url: "https://www.linkedin.com/", sort_order: 1, published: true },
+    { name: "Sarra Ben Amor", role: "VP Corporate Relations & Partnerships", linkedin_url: "https://www.linkedin.com/", sort_order: 2, published: true },
+    { name: "Yassine Mansour", role: "VP Marketing & Communications", linkedin_url: "https://www.linkedin.com/", sort_order: 3, published: true },
+    { name: "Ines Trabelsi", role: "VP Logistics & Venue Operations", linkedin_url: "https://www.linkedin.com/", sort_order: 4, published: true },
+    { name: "Mohamed Dridi", role: "VP Delegate Experience & Strategy", linkedin_url: "https://www.linkedin.com/", sort_order: 5, published: true },
+    { name: "Khalil Jbari", role: "Organizing Committee Leadership", linkedin_url: "", sort_order: 6, published: true },
+  ],
+  partners: [
+    { name: "Enterprise AI Alliance", tier: "Anchor Partner", website_url: "", sort_order: 1, published: true },
+    { name: "Cloud Compute Labs", tier: "Infrastructure", website_url: "", sort_order: 2, published: true },
+    { name: "Autonomous Systems Group", tier: "Intelligence", website_url: "", sort_order: 3, published: true },
+    { name: "Venture EMEA Capital", tier: "Investment", website_url: "", sort_order: 4, published: true },
+    { name: "Nordic Neural Works", tier: "Research", website_url: "", sort_order: 5, published: true },
+    { name: "Tunisia Digital Matrix", tier: "Ecosystem", website_url: "", sort_order: 6, published: true },
+  ],
+  speakers: [
+    {
+      name: "Executive Keynote Speaker",
+      role: "Founder & CEO",
+      company: "Leading Enterprise Scaleup",
+      badge: "Keynote Address",
+      session_title: "AI Is Changing Business",
+      bio: "Serial entrepreneur and technology leader with 15+ years scaling B2B enterprise software and operational intelligence platforms across EMEA and North Africa.",
+      linkedin_url: "https://www.linkedin.com/",
+      sort_order: 1,
+      published: true,
+    },
+    {
+      name: "Dr. Leila Ben Salem",
+      role: "Head of AI Research & Architecture",
+      company: "Neural Systems Lab",
+      badge: "Technical Keynote",
+      session_title: "Applied Generative Architectures & Business ROI",
+      bio: "Researcher specializing in distributed AI systems and modern neural network deployment.",
+      linkedin_url: "https://www.linkedin.com/",
+      sort_order: 2,
+      published: true,
+    },
+    {
+      name: "Omar Cherif",
+      role: "Managing Partner",
+      company: "Venture AI Capital",
+      badge: "Panel Moderator",
+      session_title: "Financing North African AI Champions",
+      bio: "Venture investor focused on early-stage AI startups across the Mediterranean and North Africa.",
+      linkedin_url: "https://www.linkedin.com/",
+      sort_order: 3,
+      published: true,
+    },
+    {
+      name: "Sonia Haddad",
+      role: "VP Enterprise Digital Transformation",
+      company: "Mediterranean Financial Group",
+      badge: "Executive Panel",
+      session_title: "Operational AI Governance in Regulated Markets",
+      bio: "Executive leading AI governance, compliance, and enterprise risk management.",
+      linkedin_url: "https://www.linkedin.com/",
+      sort_order: 4,
+      published: true,
+    },
+  ],
+};
+
+let isSyncingDefaults = { speakers: false, team_members: false, partners: false };
+
+async function syncDefaults(entityKey, showNotice = true) {
+  const cfg = ENTITIES[entityKey];
+  const defaults = DEFAULT_ENTITIES[entityKey];
+  if (!cfg || !defaults || !supabaseClient || isSyncingDefaults[entityKey]) return;
+
+  isSyncingDefaults[entityKey] = true;
+  const noticeEl = document.getElementById(`sync-notice-${entityKey}`);
+  if (noticeEl && showNotice) {
+    noticeEl.innerHTML = `<span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>Syncing website defaults to database...</span>`;
+    noticeEl.classList.remove("hidden");
+  }
+
+  try {
+    const { data: existing, error: selErr } = await supabaseClient.from(cfg.table).select("*");
+    if (selErr) throw selErr;
+
+    const existingMap = new Map();
+    (existing || []).forEach((item) => {
+      if (item && item.name) {
+        existingMap.set(item.name.toLowerCase().trim(), item);
+      }
+    });
+
+    const toInsert = [];
+    const toUpdate = [];
+
+    defaults.forEach((def) => {
+      const match = existingMap.get(def.name.toLowerCase().trim());
+      if (!match) {
+        // Special check: if database has 'amen' (lowercase) and def is 'Amen Krifi'
+        if (def.name.toLowerCase().includes("amen") && existingMap.has("amen")) {
+          const oldAmen = existingMap.get("amen");
+          toUpdate.push({
+            id: oldAmen.id,
+            name: def.name,
+            role: def.role,
+            linkedin_url: def.linkedin_url || oldAmen.linkedin_url || "",
+            sort_order: def.sort_order,
+            published: true,
+            photo_url: oldAmen.photo_url || "",
+          });
+          return;
+        }
+        toInsert.push(def);
+      }
+    });
+
+    for (const item of toUpdate) {
+      await supabaseClient.from(cfg.table).update(item).eq("id", item.id);
+    }
+
+    if (toInsert.length > 0) {
+      const { error: insErr } = await supabaseClient.from(cfg.table).insert(toInsert);
+      if (insErr) throw insErr;
+    }
+
+    if (noticeEl && showNotice) {
+      noticeEl.innerHTML = `<span class="flex items-center gap-2 text-primary-container font-semibold"><span class="material-symbols-outlined text-[18px]">check_circle</span>Synced ${toInsert.length + toUpdate.length} website items to database!</span>`;
+      setTimeout(() => {
+        if (noticeEl) noticeEl.classList.add("hidden");
+      }, 4000);
+    }
+
+    await loadEntity(entityKey);
+  } catch (err) {
+    console.error(`Sync error for ${entityKey}:`, err);
+    if (noticeEl && showNotice) {
+      noticeEl.innerHTML = `<span class="text-error">Sync note: ${escapeHtml(err.message)}</span>`;
+    }
+  } finally {
+    isSyncingDefaults[entityKey] = false;
+  }
+}
+
 async function loadEntity(entityKey) {
   const cfg = ENTITIES[entityKey];
   const list = document.getElementById(`list-${entityKey}`);
-  const { data, error } = await supabaseClient.from(cfg.table).select("*").order("sort_order", { ascending: true });
-  if (error) {
-    list.innerHTML = `<p class="text-error text-body-sm">Error loading: ${escapeHtml(error.message)}</p>`;
+  if (!list) return;
+
+  let data = [];
+  let fetchError = null;
+
+  if (supabaseClient) {
+    try {
+      const res = await supabaseClient.from(cfg.table).select("*").order("sort_order", { ascending: true });
+      if (res.error) {
+        fetchError = res.error;
+      } else {
+        data = res.data || [];
+      }
+    } catch (e) {
+      fetchError = e;
+    }
+  }
+
+  const defaults = DEFAULT_ENTITIES[entityKey] || [];
+
+  // Normalize existing items (e.g. if database has lowercase 'amen', enrich to 'Amen Krifi')
+  data = data.map((item) => {
+    const rawName = (item.name || "").toLowerCase().trim();
+    if (entityKey === "team_members") {
+      if (rawName === "amen" || rawName === "amen krifi") {
+        return {
+          ...item,
+          name: "Amen Krifi",
+          role: item.role && item.role !== "organizer" ? item.role : "Organizing Committee President",
+          sort_order: item.sort_order || 1,
+        };
+      }
+      if (rawName.includes("khalil")) {
+        return {
+          ...item,
+          name: "Khalil Jbari",
+          role: item.role || "Organizing Committee Leadership",
+          sort_order: item.sort_order || 6,
+        };
+      }
+    }
+    return item;
+  });
+
+  const existingNames = new Set((data || []).map((r) => (r.name || "").toLowerCase().trim()));
+  const missingDefaults = defaults.filter((d) => {
+    const dName = d.name.toLowerCase().trim();
+    if (existingNames.has(dName)) return false;
+    if (dName.includes("amen") && (existingNames.has("amen") || existingNames.has("amen krifi"))) return false;
+    if (dName.includes("khalil") && Array.from(existingNames).some((n) => n.includes("khalil"))) return false;
+    return true;
+  });
+
+  // Silent automatic sync if admin is authenticated and defaults are missing
+  if (supabaseClient && missingDefaults.length > 0) {
+    try {
+      const { data: authData } = await supabaseClient.auth.getSession();
+      if (authData?.session?.user) {
+        syncDefaults(entityKey, false);
+      }
+    } catch (e) {}
+  }
+
+  // Combine database data and website defaults so admin ALWAYS finds all team members and partners
+  let displayRows = [...data];
+  if (displayRows.length === 0 && defaults.length > 0) {
+    displayRows = defaults.map((d, i) => ({
+      ...d,
+      id: `default-${i}`,
+      isDefault: true,
+    }));
+    const noticeEl = document.getElementById(`sync-notice-${entityKey}`);
+    if (noticeEl) {
+      noticeEl.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary-container text-[20px]">info</span>
+          <span>Loaded website ${cfg.label}s. Click <strong>Sync Website ${entityKey === "team_members" ? "Team" : entityKey === "partners" ? "Partners" : "Speakers"}</strong> to store them permanently into the database.</span>
+        </div>
+      `;
+      noticeEl.classList.remove("hidden");
+    }
+  } else if (displayRows.length > 0 && missingDefaults.length > 0) {
+    const syntheticDefaults = missingDefaults.map((d, i) => ({
+      ...d,
+      id: `default-${i}`,
+      isDefault: true,
+    }));
+    displayRows = [...displayRows, ...syntheticDefaults];
+  }
+
+  if (displayRows.length === 0) {
+    list.innerHTML = `<p class="text-text-muted text-body-sm col-span-full">No ${cfg.label}s yet. Click "+ Add" or "Sync Website" to import defaults.</p>`;
     return;
   }
-  if (!data || data.length === 0) {
-    list.innerHTML = `<p class="text-text-muted text-body-sm">No ${cfg.label}s yet. Click "+ Add" to create one.</p>`;
-    return;
-  }
-  list.innerHTML = data
+
+  list.innerHTML = displayRows
     .map(
       (row) => `
-    <div class="bg-surface-card border border-surface-border rounded-xl p-4 flex flex-col gap-2">
-      <div class="w-full h-32 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center">
-        ${row[cfg.imageField] ? `<img src="${escapeHtml(row[cfg.imageField])}" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-text-muted text-[32px]">image</span>`}
+    <div class="bg-surface-card border ${row.isDefault ? "border-primary-container/40" : "border-surface-border"} rounded-xl p-4 flex flex-col justify-between gap-3">
+      <div>
+        <div class="w-full h-32 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center mb-3">
+          ${row[cfg.imageField]
+            ? `<img src="${escapeHtml(row[cfg.imageField])}" class="w-full h-full object-cover"/>`
+            : `<div class="flex flex-col items-center justify-center gap-1 text-text-muted">
+                <span class="font-bold text-2xl text-primary-container">${escapeHtml(initials(row.name))}</span>
+                <span class="text-[10px] uppercase font-label-code">No image</span>
+               </div>`
+          }
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <h4 class="font-headline-sm text-headline-sm text-text-primary font-bold truncate">${escapeHtml(row.name)}</h4>
+          <span class="text-xs px-2 py-0.5 rounded-full shrink-0 ${row.published ? "bg-primary-container/20 text-primary-container" : "bg-surface-container text-text-muted"}">${row.published ? "Published" : "Draft"}</span>
+        </div>
+        <p class="text-body-sm text-text-muted mt-1">${escapeHtml(row.role || row.tier || row.company || row.website_url || "")}</p>
+        ${row.isDefault ? `<span class="inline-block mt-2 font-label-code text-[10px] text-primary-container bg-glow-lime px-2 py-0.5 rounded uppercase font-semibold">Website Default</span>` : ""}
       </div>
-      <div class="flex items-center justify-between">
-        <h4 class="font-headline-sm text-headline-sm text-text-primary font-bold">${escapeHtml(row.name)}</h4>
-        <span class="text-xs px-2 py-0.5 rounded-full ${row.published ? "bg-primary-container/20 text-primary-container" : "bg-surface-container text-text-muted"}">${row.published ? "Published" : "Draft"}</span>
-      </div>
-      <p class="text-body-sm text-text-muted">${escapeHtml(row.role || row.website_url || "")}</p>
-      <div class="flex gap-2 mt-2">
-        <button class="edit-btn flex-1 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-body-sm" data-entity="${entityKey}" data-id="${row.id}">Edit</button>
-        <button class="delete-btn flex-1 px-3 py-1.5 rounded-full bg-error-container/20 text-error hover:bg-error-container/30 text-body-sm" data-entity="${entityKey}" data-id="${row.id}">Delete</button>
+      <div class="flex gap-2 pt-2 border-t border-surface-border/40">
+        <button class="edit-btn flex-1 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-body-sm transition-colors" data-entity="${entityKey}" data-id="${row.id}">Edit</button>
+        <button class="delete-btn flex-1 px-3 py-1.5 rounded-full bg-error-container/20 text-error hover:bg-error-container/30 text-body-sm transition-colors" data-entity="${entityKey}" data-id="${row.id}">${row.isDefault ? "Dismiss" : "Delete"}</button>
       </div>
     </div>`
     )
@@ -310,21 +560,37 @@ async function loadEntity(entityKey) {
 
   list.querySelectorAll(".edit-btn").forEach((btn) =>
     btn.addEventListener("click", () => {
-      const row = data.find((r) => r.id === btn.dataset.id);
+      const row = displayRows.find((r) => String(r.id) === String(btn.dataset.id));
       openForm(entityKey, row);
     })
   );
+
   list.querySelectorAll(".delete-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (String(id).startsWith("default-")) {
+        displayRows = displayRows.filter((r) => String(r.id) !== String(id));
+        btn.closest(".bg-surface-card").remove();
+        return;
+      }
       if (!confirm("Delete this entry? This cannot be undone.")) return;
-      await supabaseClient.from(cfg.table).delete().eq("id", btn.dataset.id);
-      loadEntity(entityKey);
+      if (supabaseClient) {
+        await supabaseClient.from(cfg.table).delete().eq("id", id);
+        loadEntity(entityKey);
+      }
     })
   );
 }
 
 document.querySelectorAll(".add-btn").forEach((btn) => {
   btn.addEventListener("click", () => openForm(btn.dataset.entity, null));
+});
+
+document.querySelectorAll(".sync-defaults-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const entityKey = btn.dataset.entity;
+    syncDefaults(entityKey, true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -752,13 +1018,50 @@ function renderApplicantsTable() {
       <td class="p-3 text-center text-xs">${a.confirmation_sent ? '<span class="text-primary-container font-bold">✓</span>' : '<span class="text-text-muted">—</span>'}</td>
       <td class="p-3 text-center text-xs">${a.reminder_sent_at ? '<span class="text-primary-container font-bold">✓</span>' : '<span class="text-text-muted">—</span>'}</td>
       <td class="p-3 text-center">
-        <button type="button" class="applicant-delete-btn p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-container transition-colors" data-id="${a.id}" data-name="${escapeHtml(a.full_name)}" title="Remove applicant">
-          <span class="material-symbols-outlined text-[18px]">delete</span>
-        </button>
+        <div class="flex items-center justify-center gap-1">
+          <button type="button" class="applicant-resend-pass-btn p-1.5 rounded-lg text-text-muted hover:text-primary-container hover:bg-surface-container transition-colors" data-id="${a.id}" data-email="${escapeHtml(a.email)}" data-name="${escapeHtml(a.full_name)}" data-code="${escapeHtml(a.pass_code || '')}" title="Resend QR Code pass by email">
+            <span class="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+          </button>
+          <button type="button" class="applicant-delete-btn p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-container transition-colors" data-id="${a.id}" data-name="${escapeHtml(a.full_name)}" title="Remove applicant">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
       </td>
     </tr>`;
     })
     .join("");
+
+  // Attach click listener to resend pass buttons
+  tbody.querySelectorAll(".applicant-resend-pass-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const email = btn.dataset.email;
+      const name = btn.dataset.name;
+      const code = btn.dataset.code;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>';
+      try {
+        const res = await fetch("/api/send-pass-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, full_name: name, pass_code: code })
+        });
+        const d = await res.json();
+        if (d.success) {
+          const applicant = applicantsCache.find((x) => x.email === email);
+          if (applicant) applicant.confirmation_sent = true;
+          renderApplicantsTable();
+          alert(`Official entry QR Code pass has been sent to ${email}!`);
+        } else {
+          alert(`Status: ${d.message || 'Email dispatched'}`);
+        }
+      } catch (e) {
+        alert("Failed to send email. Check network connection.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">forward_to_inbox</span>';
+      }
+    });
+  });
 
   // Attach change listener to status selectors
   tbody.querySelectorAll(".applicant-status-select").forEach((sel) => {
@@ -884,11 +1187,34 @@ const SAMPLE_PARTNERS = [
 async function loadApplicants() {
   let records = [];
   let dbSuccess = false;
+
+  // 1. Fetch from server endpoint /api/applicants
+  try {
+    const apiRes = await fetch("/api/applicants");
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData.success && Array.isArray(apiData.data)) {
+        records = apiData.data;
+        dbSuccess = true;
+      }
+    }
+  } catch (apiErr) {
+    console.warn("Applicants API note:", apiErr);
+  }
+
+  // 2. Also merge from Supabase if connected
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient.from("applicants").select("*").order("created_at", { ascending: false });
       if (!error && Array.isArray(data)) {
-        records = data;
+        for (const sbItem of data) {
+          const idx = records.findIndex((r) => r.email === sbItem.email || r.id === sbItem.id);
+          if (idx >= 0) {
+            records[idx] = { ...records[idx], ...sbItem };
+          } else {
+            records.push(sbItem);
+          }
+        }
         dbSuccess = true;
       } else if (error) {
         console.warn("Applicants fetch error:", error);
@@ -898,8 +1224,8 @@ async function loadApplicants() {
     }
   }
 
-  // Only fall back to sample delegates if Supabase is completely unavailable
-  if (!dbSuccess && !supabaseClient && records.length === 0) {
+  // Only fall back to sample delegates if completely empty
+  if (!dbSuccess && records.length === 0) {
     records = [...SAMPLE_DELEGATES];
   }
 
@@ -1851,16 +2177,36 @@ function onScannerTabClosed() {
   }
 }
 
+let checkinInFlight = false;
+
 async function processCheckin(payloadString, source = "camera") {
   if (!payloadString) return;
   const rawText = String(payloadString).trim();
 
-  // Rate-limiting debounce for camera scans
-  if (source === "camera" && rawText === lastScannedPayload && Date.now() - scannerCooldownTimer < 2500) {
-    return;
+  if (source === "camera") {
+    const now = Date.now();
+    // Same QR still in front of the camera: keep ignoring it
+    if (rawText === lastScannedPayload && now - scannerCooldownTimer < 3000) {
+      scannerCooldownTimer = now;
+      return;
+    }
+    // A check-in is still being processed: ignore extra frames
+    if (checkinInFlight) return;
+    scannerCooldownTimer = now;
+    lastScannedPayload = rawText;
   }
-  scannerCooldownTimer = Date.now();
-  lastScannedPayload = rawText;
+
+  checkinInFlight = true;
+  try {
+    await processCheckinInner(rawText, source);
+  } finally {
+    checkinInFlight = false;
+  }
+}
+
+async function processCheckinInner(payloadString, source = "camera") {
+  if (!payloadString) return;
+  const rawText = String(payloadString).trim();
 
   // 1. Parse payload to extract identifiers: email, code, id, name
   let targetEmail = "";
@@ -1969,46 +2315,41 @@ async function processCheckin(payloadString, source = "camera") {
       applicant: found,
       time: found.checked_in_at ? new Date(found.checked_in_at).toLocaleTimeString() : "Earlier Today"
     });
-  } else {
-    // Mark as ATTENDED
+    } else {
+    // Mark as ATTENDED and update the screen immediately
     found.status = "attended";
     found.checked_in_at = nowIso;
 
-    // Save to database
-    if (supabaseClient && isUuid(found.id)) {
-      try {
-        const { error } = await supabaseClient.from("applicants").update({ status: "attended", checked_in_at: nowIso }).eq("id", found.id);
-        if (error) {
-          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
-        }
-      } catch (err) {
-        try {
-          await supabaseClient.from("applicants").update({ status: "attended" }).eq("id", found.id);
-        } catch (e) {}
-      }
-    }
-
     playScannerTone("success");
-
-    // Add to session history
     gateRecentCheckins.unshift({
       applicant: found,
       timeStr: timeFormatted,
       timestamp: Date.now()
     });
     renderGateHistory();
-
-    // Render result card
-    renderScannerResult({
-      type: "success",
-      applicant: found,
-      time: timeFormatted
-    });
-
-    // Refresh dashboards & lists
+    renderScannerResult({ type: "success", applicant: found, time: timeFormatted });
     updateMetricsDashboard();
     updateGateScannerStats();
     renderApplicantsTable();
+
+    // Save in the background; undo the check-in if the save fails
+    if (supabaseClient && isUuid(found.id)) {
+      supabaseClient
+        .from("applicants")
+        .update({ status: "attended", checked_in_at: nowIso })
+        .eq("id", found.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error("Check-in save failed:", error);
+            found.status = "registered";
+            found.checked_in_at = null;
+            updateMetricsDashboard();
+            updateGateScannerStats();
+            renderApplicantsTable();
+            alert("Check-in for " + found.full_name + " was NOT saved: " + error.message);
+          }
+        });
+      }
   }
 }
 

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="shiftLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#424245" />
+      <stop offset="40%" stop-color="#303032" />
+      <stop offset="100%" stop-color="#18181a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Piece 1: Top Chevron -->
+  <polygon points="100,18 175,61 175,87 100,44 25,87 25,61" fill="url(#shiftLogoGrad)" />
+
+  <!-- Piece 2: Middle S Piece -->
+  <!-- Upper notch: 25,101 to 100,58 to 175,101 -->
+  <!-- Right wall: 175,101 to 175,122 -->
+  <!-- Slanted bottom cut: from (175, 122) down-left to (25, 208)? No, (25, 160) to (175, 74)? -->
+  <!-- Let's check: in the user's image, the diagonal cut starts on the bottom-left and slopes UP-RIGHT to the right side! -->
+  <polygon points="100,58 175,101 175,124 25,166 25,101" fill="url(#shiftLogoGrad)" />
+
+  <!-- Piece 3: Bottom Piece -->
+  <!-- Slanted top cut: with gap = 14 from Piece 2's bottom cut (from 25,180 to 175,138) -->
+  <polygon points="25,180 175,138 175,179 100,222 25,179" fill="url(#shiftLogoGrad)" />
+</svg>

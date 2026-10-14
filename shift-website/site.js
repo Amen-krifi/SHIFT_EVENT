@@ -711,11 +711,25 @@ function initRegisterForm() {
           return;
         }
 
+        // Fire registration API & email worker
+        try {
+          await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        } catch (apiErr) {
+          console.warn("Server register note:", apiErr);
+        }
+
         // Fire live Supabase Edge Function (send-confirmation)
         try {
           if (supabaseClient.functions && typeof supabaseClient.functions.invoke === "function") {
+            const randHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const passCode = `SHFT-2026-${randHex}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent("https://shift-event.tn/?verify=" + passCode + "&email=" + payload.email)}`;
             await supabaseClient.functions.invoke("send-confirmation", {
-              body: { full_name: payload.full_name, email: payload.email },
+              body: { full_name: payload.full_name, email: payload.email, pass_code: passCode, qr_code_url: qrUrl },
             });
           }
         } catch (emailErr) {
@@ -762,17 +776,17 @@ function initRegisterForm() {
     const qrBox = document.getElementById("pass-qrcode-box");
     if (qrBox) {
       qrBox.innerHTML = "";
-            const qrPayload = `${currentPassCode}|${payload.email}`;
+      const qrPayload = currentPassCode;
 
       if (typeof QRCode !== "undefined") {
         try {
           new QRCode(qrBox, {
             text: qrPayload,
-            width: 220,
-            height: 220,
-            colorDark: "#0F172A",
+            width: 114,
+            height: 114,
+            colorDark: "#000000",
             colorLight: "#FFFFFF",
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.L
           });
         } catch (qrErr) {
           console.warn("QR code generation err:", qrErr);

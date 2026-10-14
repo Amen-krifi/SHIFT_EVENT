@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="charcoalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#48484a" />
+      <stop offset="40%" stop-color="#323234" />
+      <stop offset="100%" stop-color="#1c1c1e" />
+    </linearGradient>
+  </defs>
+
+  <!-- TOP CHEVRON -->
+  <polygon points="
+    100,16
+    180,62
+    180,88
+    100,42
+    20,88
+    20,62
+  " fill="url(#charcoalGrad)" />
+
+  <!-- MIDDLE DIAGONAL 'S' SEGMENT -->
+  <!-- Top edges match chevron notch (with gap = 14) -->
+  <!-- Bottom edges match bottom chevron notch (with gap = 14) -->
+  <polygon points="
+    180,102
+    100,56
+    20,102
+    20,138
+    100,184
+    180,138
+  " fill="url(#charcoalGrad)" />
+
+  <!-- BOTTOM CHEVRON -->
+  <polygon points="
+    100,224
+    20,178
+    20,152
+    100,198
+    180,152
+    180,178
+  " fill="url(#charcoalGrad)" />
+</svg>

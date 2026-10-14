@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="darkHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#424245" />
+      <stop offset="50%" stop-color="#2e2e30" />
+      <stop offset="100%" stop-color="#1e1e20" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Hexagon: (100,16) -> (174,58) -> (174,162) -> (100,204) -> (26,162) -> (26,58) -->
+  <!-- We can draw the S as a single clean polygon or using exact cuts -->
+  <!-- Top arm: (100,16) to (174,58) down to (174,94), in to (100,52), then connects to left (26,94) down to (26,58) -->
+  <path d="
+    M 100,16
+    L 174,58
+    L 174,94
+    L 100,52
+    L 62,74
+    L 62,94
+    L 142,140
+    L 142,120
+    L 174,138
+    L 174,162
+    L 100,204
+    L 26,162
+    L 26,126
+    L 100,168
+    L 138,146
+    L 138,126
+    L 58,80
+    L 58,100
+    L 26,82
+    L 26,58
+    Z
+  " fill="url(#darkHexGrad)" fill-rule="evenodd"/>
+</svg>

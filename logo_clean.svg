@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#424245" />
+      <stop offset="40%" stop-color="#2e2e30" />
+      <stop offset="100%" stop-color="#18181a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Top Chevron -->
+  <polygon points="100,15 180,61 180,88 100,42 20,88 20,61" fill="url(#logoGrad)" />
+
+  <!-- Middle Shape -->
+  <polygon points="100,56 180,102 180,132 20,180 20,102" fill="url(#logoGrad)" />
+
+  <!-- Bottom Shape -->
+  <polygon points="20,194 180,146 180,179 100,225 20,179" fill="url(#logoGrad)" />
+</svg>

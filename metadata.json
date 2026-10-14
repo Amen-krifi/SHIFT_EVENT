@@ -1,11 +1,14 @@
 {
   "name": "SHIFT — Executive AI Summit",
-  "description": "A one-day executive summit convening enterprise founders, c-level strategists, and machine intelligence architects with the next generation of builders.",
+  "description": "SHIFT — Where Business Meets AI is a one-day business-focused event organized by AIESEC in Bardo at HIDE University on 28 November 2026.",
   "prompt": "This app was imported from GitHub repository Amen-krifi/SHIFT_EVENT.",
   "permissions": [
     "camera"
   ],
   "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }

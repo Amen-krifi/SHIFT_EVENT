@@ -1,0 +1,42 @@
+[
+  {
+    "id": "disp-1791538886346-5lct",
+    "to": "amenkrifi5@gmail.com",
+    "full_name": "Amen Krifi",
+    "pass_code": "SHFT-2026-995E19",
+    "scan_url": "http://localhost:3000/?verify=SHFT-2026-995E19&email=amenkrifi5%40gmail.com",
+    "status": "sent",
+    "message": "Pass and entry QR code prepared and dispatched to amenkrifi5@gmail.com.",
+    "timestamp": "2026-10-09T09:41:26.346Z"
+  },
+  {
+    "id": "disp-1791538876730-4kcz",
+    "to": "amenkrifi5@gmail.com",
+    "full_name": "Amen Krifi",
+    "pass_code": "SHFT-2026-995E19",
+    "scan_url": "http://localhost:3000/?verify=SHFT-2026-995E19&email=amenkrifi5%40gmail.com",
+    "status": "sent",
+    "message": "Pass and entry QR code prepared and dispatched to amenkrifi5@gmail.com.",
+    "timestamp": "2026-10-09T09:41:16.730Z"
+  },
+  {
+    "id": "disp-1791538870631-rqmo",
+    "to": "amenkrifi5@gmail.com",
+    "full_name": "Amen Krifi",
+    "pass_code": "SHFT-2026-995E19",
+    "scan_url": "http://localhost:3000/?verify=SHFT-2026-995E19&email=amenkrifi5%40gmail.com",
+    "status": "sent",
+    "message": "Pass and entry QR code prepared and dispatched to amenkrifi5@gmail.com.",
+    "timestamp": "2026-10-09T09:41:10.631Z"
+  },
+  {
+    "id": "disp-1791538861765-cbvm",
+    "to": "amenkrifi5@gmail.com",
+    "full_name": "Amen Krifi",
+    "pass_code": "SHFT-2026-995E19",
+    "scan_url": "http://localhost:3000/?verify=SHFT-2026-995E19&email=amenkrifi5%40gmail.com",
+    "status": "sent",
+    "message": "Pass and entry QR code prepared and dispatched to amenkrifi5@gmail.com.",
+    "timestamp": "2026-10-09T09:41:01.765Z"
+  }
+]

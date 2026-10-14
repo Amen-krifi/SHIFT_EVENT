@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <linearGradient id="shiftHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a4a4d" />
+      <stop offset="35%" stop-color="#363638" />
+      <stop offset="100%" stop-color="#1e1e20" />
+    </linearGradient>
+  </defs>
+
+  <!-- Top Chevron Cap -->
+  <polygon points="100,16 176,60 176,90 100,46 24,90 24,60" fill="url(#shiftHexGrad)" />
+
+  <!-- Middle Shape (The S Spine & Upper/Lower Turns) -->
+  <polygon points="24,104 100,60 100,90 48,120 176,194 176,164 128,136 176,108 176,104" fill="url(#shiftHexGrad)" />
+
+  <!-- Bottom Segment -->
+  <polygon points="24,150 100,194 100,224 24,180" fill="url(#shiftHexGrad)" />
+</svg>

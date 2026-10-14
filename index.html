@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHIFT — Where Business Meets AI</title>
+  <meta name="description" content="A one-day business-focused event organized by AIESEC in Bardo at HIDE University on 28 November 2026. Bringing together business leaders, entrepreneurs, AI innovators, students, and young professionals." />
+  <meta property="og:title" content="SHIFT — Where Business Meets AI" />
+  <meta property="og:description" content="A one-day business-focused event organized by AIESEC in Bardo at HIDE University on 28 November 2026. Bringing together business leaders, entrepreneurs, AI innovators, students, and young professionals." />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Retro Dot-Matrix Display Font: BubbledotICG-FinePos via OnlineWebFonts CDN -->
+  <link href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos" rel="stylesheet" />
+
+  <!-- Font Awesome 6.5.2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Full-bleed background (New animated #9FD54B & #0F172A theme with recent video preserved) -->
+  <div class="bg" id="bg-container" data-bg-theme="lime-slate">
+    <!-- New: GPU-accelerated animated canvas rendering #9FD54B & #0F172A organic aurora and AI neural mesh -->
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+
+    <!-- Recent version: Full-bleed background video preserved for testing & side-by-side comparison -->
+    <video class="bg-video" id="bg-video" autoplay muted loop playsinline>
+      <source
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
+        type="video/mp4"
+      />
+    </video>
+    <div class="bg-overlay" id="bg-overlay"></div>
+  </div>
+
+  <!-- Single-viewport 3-region layout -->
+  <div class="page">
+
+    <!-- 1) HEADER -->
+    <header class="header">
+      <!-- Circular Logo Button -->
+      <a href="#" class="header-logo-btn" id="header-logo-btn" title="SHIFT Home">
+        <img src="assets/logo.webp" alt="" width="52" height="52" />
+      </a>
+
+      <!-- Desktop Nav Pill (White) -->
+      <nav class="nav-pill" aria-label="Main Navigation">
+        <button type="button" class="nav-link active" data-view="home">Home</button>
+        <button type="button" class="nav-link" data-view="about">About</button>
+        <button type="button" class="nav-link" data-view="agenda">Agenda</button>
+        <button type="button" class="nav-link" data-view="speakers">Speakers</button>
+        <button type="button" class="nav-link" data-view="partners">Partners</button>
+        <button type="button" class="nav-link" data-view="team">Team</button>
+        <button type="button" class="nav-link" data-view="faq">FAQ</button>
+      </nav>
+
+      <!-- Desktop Action Pills -->
+      <div class="header-actions">
+        <button type="button" class="btn-pill-dark" data-open-modal="partner">Become a Partner</button>
+        <button type="button" class="btn-pill-white" data-open-modal="register">Register</button>
+      </div>
+
+      <!-- Mobile Burger Button -->
+      <button type="button" class="mobile-burger-btn" id="mobile-burger-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="burger-bar"></span>
+        <span class="burger-bar"></span>
+        <span class="burger-bar"></span>
+      </button>
+    </header>
+
+    <!-- Mobile Menu Overlay & Sheet -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+    <div class="mobile-sheet-menu" id="mobile-sheet-menu" role="dialog" aria-modal="true">
+      <a href="#" class="mobile-nav-link active" data-view="home">Home</a>
+      <a href="#about" class="mobile-nav-link" data-view="about">About</a>
+      <a href="#agenda" class="mobile-nav-link" data-view="agenda">Agenda</a>
+      <a href="#speakers" class="mobile-nav-link" data-view="speakers">Speakers</a>
+      <a href="#partners" class="mobile-nav-link" data-view="partners">Partners</a>
+      <a href="#team" class="mobile-nav-link" data-view="team">Team</a>
+      <a href="#faq" class="mobile-nav-link" data-view="faq">FAQ</a>
+      <div class="mobile-actions">
+        <button type="button" class="btn-pill-dark" style="width:100%;text-align:center;" data-open-modal="partner">Become a Partner</button>
+        <button type="button" class="btn-pill-white" style="width:100%;text-align:center;" data-open-modal="register">Register</button>
+      </div>
+    </div>
+
+    <!-- 2) HERO (CENTER VIEW FOR HOME) -->
+    <main class="hero" id="hero-view">
+      <!-- Live Summit Countdown Timer Pill -->
+      <div class="summit-timer-pill" id="summit-countdown" title="Time remaining until SHIFT 2026 at HIDE University">
+        <span class="timer-dot"></span>
+        <span class="timer-kicker">28 NOV 2026 · HIDE UNIVERSITY</span>
+        <span class="timer-divider">·</span>
+        <div class="timer-digits">
+          <span class="timer-unit"><span class="timer-val" id="countdown-days">51</span><span class="timer-lbl">d</span></span>
+          <span class="timer-col">:</span>
+          <span class="timer-unit"><span class="timer-val" id="countdown-hours">14</span><span class="timer-lbl">h</span></span>
+          <span class="timer-col">:</span>
+          <span class="timer-unit"><span class="timer-val" id="countdown-mins">22</span><span class="timer-lbl">m</span></span>
+          <span class="timer-col">:</span>
+          <span class="timer-unit"><span class="timer-val" id="countdown-secs">10</span><span class="timer-lbl">s</span></span>
+        </div>
+      </div>
+
+      <!-- Headline -->
+      <h1 class="headline anim">
+        <span class="line line-1">Where Business</span>
+        <span class="line line-2">Meets AI</span>
+      </h1>
+
+      <!-- Subhead -->
+      <p class="subhead">
+        A one-day business-focused event organized by AIESEC in Bardo at HIDE University. Bringing together business leaders, entrepreneurs, AI innovators, students, and young professionals to explore real-world AI applications, business opportunities, challenges, and the future of work.
+      </p>
+
+      <!-- CTAs -->
+      <div class="hero-cta-group">
+        <button type="button" class="btn-cta-primary" data-open-modal="register">Register Your Seat</button>
+        <button type="button" class="btn-cta-secondary" data-nav-view="about">Explore Summit</button>
+      </div>
+    </main>
+
+    <!-- SEPARATE PAGES / VIEW PANELS (CENTER VIEW WHEN ACTIVE) -->
+
+    <!-- VIEW: ABOUT -->
+    <section class="view-panel" id="view-about" aria-labelledby="about-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Event Brief · SHIFT 2026</span>
+          <h2 class="view-panel-title" id="about-panel-title">Where Business<br/>Meets AI.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px;margin-bottom:24px;">
+        <div>
+          <p style="font-size:15px;line-height:1.65;color:#c4c2c3;margin:0 0 16px;">
+            SHIFT — Where Business Meets AI is a one-day business-focused event organized by AIESEC in Bardo, bringing together business leaders, entrepreneurs, AI innovators, students, and young professionals to explore how Artificial Intelligence is transforming the way businesses operate, innovate, and create value.
+          </p>
+          <p style="font-size:14px;line-height:1.6;color:#8e8e8e;margin:0 0 16px;">
+            Rather than focusing on the technical side of AI, SHIFT focuses on real-world applications, business opportunities, challenges, and the future of work through inspiring talks, expert discussions, interactive sessions, partner showcases, and a dedicated networking space. The event aims to create meaningful connections between the next generation of business builders and the people already shaping the future of business with AI.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:12px;background:rgba(255,255,255,0.08);padding:4px 10px;border-radius:999px;color:#ffffff;">500+ Participants</span>
+            <span style="font-size:12px;background:rgba(255,255,255,0.08);padding:4px 10px;border-radius:999px;color:#ffffff;">AIESEC in Bardo</span>
+            <span style="font-size:12px;background:rgba(255,255,255,0.08);padding:4px 10px;border-radius:999px;color:#ffffff;">HIDE University</span>
+            <span style="font-size:12px;background:rgba(159,213,75,0.18);border:1px solid var(--primary-lime);padding:4px 10px;border-radius:999px;color:var(--primary-lime);font-weight:600;">Real-World Impact</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:12px;">
+          <div style="background:rgba(30,30,34,0.7);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:24px;font-weight:800;color:var(--primary-lime);">100%</div>
+            <div style="font-size:13px;font-weight:600;color:#ffffff;">Real-World AI</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Business applications over technical hype.</div>
+          </div>
+          <div style="background:rgba(30,30,34,0.7);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:24px;font-weight:800;color:#ffffff;">500+</div>
+            <div style="font-size:13px;font-weight:600;color:#ffffff;">Leaders &amp; Builders</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Direct networking corridors between industry &amp; youth.</div>
+          </div>
+          <div style="background:rgba(30,30,34,0.7);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:24px;font-weight:800;color:#ffffff;">08h</div>
+            <div style="font-size:13px;font-weight:600;color:#ffffff;">Intensive Summit</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Keynotes, interactive sessions &amp; partner showcases.</div>
+          </div>
+          <div style="background:rgba(30,30,34,0.7);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:24px;font-weight:800;color:var(--primary-lime);">Bardo</div>
+            <div style="font-size:13px;font-weight:600;color:#ffffff;">AIESEC Leadership</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Organized under global AIESEC governance.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <i class="fa-regular fa-calendar-check" style="font-size:24px;color:var(--primary-lime);"></i>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#ffffff;">28 November 2026 · HIDE University, Tunis</div>
+            <div style="font-size:12px;color:var(--muted);">Organized by AIESEC in Bardo · Where Business Meets AI</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <a href="#" class="cal-export-ics btn-pill-dark" style="font-size:12px;height:38px;padding:0 14px;"><i class="fa-solid fa-download" style="margin-right:6px;"></i> Apple/ICS</a>
+          <a href="#" target="_blank" rel="noreferrer" class="cal-export-google btn-pill-dark" style="font-size:12px;height:38px;padding:0 14px;"><i class="fa-brands fa-google" style="margin-right:6px;"></i> Google Cal</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: AGENDA -->
+    <section class="view-panel" id="view-agenda" aria-labelledby="agenda-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Summit Timeline</span>
+          <h2 class="view-panel-title" id="agenda-panel-title">One day, start to finish.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <!-- Filter pills bar -->
+      <div class="agenda-filters-bar">
+        <div class="agenda-filters-group">
+          <button type="button" class="agenda-filter-btn active" data-filter="all">All (12)</button>
+          <button type="button" class="agenda-filter-btn" data-filter="talks">Talks (7)</button>
+          <button type="button" class="agenda-filter-btn" data-filter="networking">Networking (4)</button>
+          <button type="button" class="agenda-filter-btn" data-filter="workshop">Workshop (1)</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">
+          <i class="fa-solid fa-circle-info" style="color:var(--primary-lime);margin-right:4px;"></i> Tap any session to expand brief & key takeaways
+        </div>
+      </div>
+
+      <!-- Agenda items list -->
+      <div id="agenda-list-container"></div>
+    </section>
+
+    <!-- VIEW: SPEAKERS -->
+    <section class="view-panel" id="view-speakers" aria-labelledby="speakers-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Faculty & Leadership</span>
+          <h2 class="view-panel-title" id="speakers-panel-title">Voices Defining Enterprise AI.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <div class="speakers-grid" id="speakers-container"></div>
+    </section>
+
+    <!-- VIEW: PARTNERS -->
+    <section class="view-panel" id="view-partners" aria-labelledby="partners-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Strategic Alliances</span>
+          <h2 class="view-panel-title" id="partners-panel-title">Trusted By Enterprise Leaders.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <div style="background:rgba(30,30,34,0.7);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+        <div style="max-width:560px;">
+          <span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.08em;">Corporate Co-Creation</span>
+          <h3 style="font-size:20px;font-weight:700;color:#ffffff;margin:4px 0 8px;">Anchor the Premier Executive Assembly</h3>
+          <p style="font-size:13px;color:#c4c2c3;margin:0;line-height:1.55;">
+            Gain direct brand positioning and engage 150+ high-potential builders and machine intelligence researchers in North Africa.
+          </p>
+        </div>
+        <button type="button" class="btn-pill-white" data-open-modal="partner">Become a Partner</button>
+      </div>
+
+      <div class="partners-grid" id="partners-container"></div>
+    </section>
+
+    <!-- VIEW: TEAM -->
+    <section class="view-panel" id="view-team" aria-labelledby="team-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Organizing Committee</span>
+          <h2 class="view-panel-title" id="team-panel-title">AIESEC in Bardo Leadership.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <div class="team-grid" id="team-container"></div>
+    </section>
+
+    <!-- VIEW: FAQ -->
+    <section class="view-panel" id="view-faq" aria-labelledby="faq-panel-title">
+      <div class="view-panel-header">
+        <div>
+          <span class="view-panel-kicker">Clarity & Governance</span>
+          <h2 class="view-panel-title" id="faq-panel-title">Frequently Asked Questions.</h2>
+        </div>
+        <button type="button" class="view-panel-close-btn"><i class="fa-solid fa-arrow-left"></i> Home</button>
+      </div>
+
+      <div class="faq-stack">
+        <div class="faq-card">
+          <button type="button" class="faq-question-btn">
+            <span>Who should attend SHIFT 2026?</span>
+            <i class="fa-solid fa-plus faq-icon"></i>
+          </button>
+          <div class="faq-answer">
+            SHIFT is intentionally curated for enterprise decision-makers (CTOs, CEOs, Heads of Product and Transformation) alongside vetted students and builders specializing in AI, distributed systems, and business architecture.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <button type="button" class="faq-question-btn">
+            <span>Is SHIFT a hackathon or technical demo day?</span>
+            <i class="fa-solid fa-plus faq-icon"></i>
+          </button>
+          <div class="faq-answer">
+            No. SHIFT is an executive summit focused on strategic enterprise deployment, ROI validation, and capital allocation. There is zero competitive hacking; instead, delegates explore real-world production cases and high-trust networking salons.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <button type="button" class="faq-question-btn">
+            <span>Where is the event located and what does registration include?</span>
+            <i class="fa-solid fa-plus faq-icon"></i>
+          </button>
+          <div class="faq-answer">
+            SHIFT takes place on 28 November 2026 at HIDE University in Tunis. Organized by AIESEC in Bardo, the summit brings together business leaders, entrepreneurs, AI innovators, students, and young professionals for a full day of inspiring talks, expert discussions, interactive sessions, partner showcases, and dedicated networking.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <button type="button" class="faq-question-btn">
+            <span>How are partner sponsorships structured?</span>
+            <i class="fa-solid fa-plus faq-icon"></i>
+          </button>
+          <div class="faq-answer">
+            Partner packages include Keynote speaking slots, partner showcase lounges, brand visibility across the summit, and direct recruiting matchmaking with the top builders and young professionals.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3) STATS FOOTER (EVENT SPECIFIC METRICS) -->
+    <footer class="stats-footer">
+      <div class="stat-item">
+        <span class="stat-icon">&lt;</span>
+        <div class="stat-content">
+          <span class="stat-value" id="stat-val-1">500+</span>
+          <span class="stat-label">Leaders &amp; Builders</span>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-icon">%</span>
+        <div class="stat-content">
+          <span class="stat-value" id="stat-val-2">100%</span>
+          <span class="stat-label">Real-World AI</span>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-icon">*</span>
+        <div class="stat-content">
+          <span class="stat-value" id="stat-val-3">8h</span>
+          <span class="stat-label">Intensive Summit</span>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-icon">#</span>
+        <div class="stat-content">
+          <span class="stat-value" id="stat-val-4">12+</span>
+          <span class="stat-label">Sessions &amp; Panels</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- SUB-FOOTER WITH CREDITS -->
+    <div class="site-sub-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:24px 8px 36px;border-top:1px solid rgba(255,255,255,0.06);margin-top:20px;font-size:12px;color:var(--muted);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-weight:700;color:#ffffff;letter-spacing:0.04em;">SHIFT.2026</span>
+        <span>—</span>
+        <span>Organized by <strong style="color:#ffffff;">AIESEC in Bardo</strong> · HIDE University, Tunis</span>
+      </div>
+      <div>
+        <span>November 28, 2026 · Tunis, Tunisia</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Speaker Detail Modal -->
+  <div class="modal-overlay" id="modal-speaker-detail" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div id="speaker-modal-avatar" style="width:68px;height:68px;border-radius:50%;background:#28282a;border:2px solid var(--primary-lime);display:grid;place-items:center;overflow:hidden;flex-shrink:0;"></div>
+        <div>
+          <span id="speaker-modal-badge" style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.06em;">Keynote Address</span>
+          <h3 id="speaker-modal-name" style="font-size:20px;font-weight:700;color:#ffffff;margin:2px 0;">Speaker Name</h3>
+          <p id="speaker-modal-role" style="font-size:13px;color:#c4c2c3;margin:0;">Executive Role</p>
+          <p id="speaker-modal-company" style="font-size:12px;color:var(--muted);margin:0;">Company</p>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--primary-lime);font-weight:600;text-transform:uppercase;">Session Title</div>
+        <div id="speaker-modal-session" style="font-size:15px;font-weight:700;color:#ffffff;margin:2px 0 6px;">Session Title</div>
+        <div id="speaker-modal-abstract" style="font-size:13px;color:#c4c2c3;line-height:1.55;">Session abstract.</div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">Biography</div>
+        <div id="speaker-modal-bio" style="font-size:13px;color:#c4c2c3;line-height:1.55;">Bio content.</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
+        <span id="speaker-modal-time" style="font-size:12px;color:var(--muted);"><i class="fa-regular fa-clock" style="margin-right:4px;"></i> 28 Nov 2026</span>
+        <a id="speaker-modal-linkedin" href="#" target="_blank" rel="noreferrer" class="btn-pill-dark" style="font-size:12px;height:36px;padding:0 14px;"><i class="fa-brands fa-linkedin-in" style="margin-right:6px;"></i> LinkedIn Profile</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Registration Form Modal -->
+  <div class="modal-overlay" id="modal-registration" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="margin-bottom:20px;">
+        <span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.08em;">Official Registration</span>
+        <h3 style="font-size:22px;font-weight:700;color:#ffffff;margin:4px 0 6px;">Register Executive Interest</h3>
+        <p style="font-size:13px;color:#c4c2c3;margin:0;">Join enterprise leaders and elite builders at SHIFT 2026 in Tunis.</p>
+      </div>
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name *</label>
+          <input type="text" id="reg-name" class="form-input" required placeholder="Sarah Connor" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Work or Academic Email *</label>
+          <input type="email" id="reg-email" class="form-input" required placeholder="s.connor@enterprise.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">Phone / WhatsApp *</label>
+          <input type="tel" id="reg-phone" class="form-input" required placeholder="+216 00 000 000" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="reg-university">Institution / Company</label>
+            <input type="text" id="reg-university" class="form-input" placeholder="Enterprise / University" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-faculty">Role / Department</label>
+            <input type="text" id="reg-faculty" class="form-input" placeholder="VP Product / AI Eng." />
+          </div>
+        </div>
+        <div id="register-form-message" style="display:none;font-size:13px;margin-bottom:12px;"></div>
+        <button type="submit" class="btn-pill-white" style="width:100%;font-size:14px;height:46px;">Submit Registration</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Registration Verification Pop-up Window -->
+  <div class="modal-overlay" id="modal-reg-verification" role="dialog" aria-modal="true">
+    <div class="modal-content" style="max-width:620px;">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(159,213,75,0.15);border:1px solid var(--primary-lime);display:grid;place-items:center;margin:0 auto 12px;color:var(--primary-lime);font-size:22px;">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 style="font-size:22px;font-weight:700;color:#ffffff;margin:0 0 6px;">Registration Confirmed</h3>
+        <p style="font-size:13px;color:#c4c2c3;margin:0;">
+          Welcome, <span id="verif-name" style="color:#ffffff;font-weight:600;">Delegate</span>. Your credentials have been issued.
+        </p>
+      </div>
+
+      <!-- Email Dispatch Confirmation Banner -->
+      <div id="email-confirmation-banner" style="background:rgba(159,213,75,0.08);border:1px solid rgba(159,213,75,0.3);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <i class="fa-solid fa-envelope-circle-check" style="color:var(--primary-lime);font-size:18px;"></i>
+          <span style="font-size:13px;color:#ffffff;">
+            Entry QR code sent to <strong id="verif-email" style="color:var(--primary-lime);">delegate@enterprise.com</strong>
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <a id="preview-email-pass-btn" href="#" target="_blank" rel="noopener noreferrer" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#ffffff;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;" title="Preview the email pass in browser">
+            <i class="fa-solid fa-eye"></i> View Email
+          </a>
+          <button type="button" id="resend-pass-email-btn" style="background:rgba(159,213,75,0.15);border:1px solid var(--primary-lime);color:var(--primary-lime);padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;" title="Resend pass and QR code to your email">
+            <i class="fa-solid fa-rotate-right"></i> Resend Email
+          </button>
+        </div>
+      </div>
+
+      <!-- Digital Pass Card Preview -->
+      <div style="background:#0a0a0c;border:1px solid rgba(159,213,75,0.3);border-radius:18px;padding:20px;margin-bottom:20px;position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#ffffff;">SHIFT.<span style="color:var(--primary-lime);">2026</span></div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;">AIESEC IN BARDO EXECUTIVE ACCESS</div>
+          </div>
+          <span style="font-size:10px;font-weight:700;background:rgba(159,213,75,0.15);border:1px solid var(--primary-lime);color:var(--primary-lime);padding:3px 8px;border-radius:999px;">OFFICIAL DELEGATE</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;">Credential Holder</div>
+            <div id="pass-holder-name" style="font-size:19px;font-weight:700;color:#ffffff;">Delegate Name</div>
+            <div id="pass-holder-org" style="font-size:13px;color:#c4c2c3;margin-top:2px;">Executive Delegate</div>
+            <div style="margin-top:14px;font-size:11px;color:var(--muted);">
+              SECURITY CODE: <span id="pass-code" style="color:var(--primary-lime);font-family:monospace;font-weight:700;font-size:13px;">SHFT-2026-DELEGATE</span>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:var(--muted);">
+              STATUS: <span style="color:var(--primary-lime);font-weight:600;">ACTIVE · INSTANT GATE SCAN</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div id="pass-qrcode-box" style="width:144px;height:144px;background:#ffffff;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 24px rgba(255,255,255,0.18);"></div>
+            <span style="font-size:10px;color:var(--muted);letter-spacing:0.04em;">INSTANT SCAN QR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button type="button" id="download-pass-btn" class="btn-pill-white" style="width:100%;height:44px;">
+          <i class="fa-solid fa-download" style="margin-right:8px;"></i> Download Digital Pass (.PNG)
+        </button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <a href="#" target="_blank" rel="noreferrer" class="cal-export-google btn-pill-dark" style="text-align:center;font-size:12px;">
+            <i class="fa-brands fa-google" style="margin-right:6px;"></i> Google Calendar
+          </a>
+          <a href="#" class="cal-export-ics btn-pill-dark" style="text-align:center;font-size:12px;">
+            <i class="fa-solid fa-calendar-days" style="margin-right:6px;"></i> Apple/ICS
+          </a>
+        </div>
+        <!-- Social share -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
+          <span style="font-size:12px;color:var(--muted);">Share Registration:</span>
+          <a id="share-linkedin-btn" href="#" target="_blank" rel="noreferrer" style="color:#ffffff;font-size:16px;"><i class="fa-brands fa-linkedin"></i></a>
+          <a id="share-x-btn" href="#" target="_blank" rel="noreferrer" style="color:#ffffff;font-size:16px;"><i class="fa-brands fa-x-twitter"></i></a>
+          <button type="button" id="share-copy-btn" style="background:transparent;border:none;color:#ffffff;font-size:16px;cursor:pointer;"><i class="fa-solid fa-link"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Become a Partner Confirmation Modal -->
+  <div class="modal-overlay" id="modal-partner-confirm" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);display:grid;place-items:center;margin:0 auto 12px;color:#ffffff;font-size:20px;">
+          <i class="fa-solid fa-handshake"></i>
+        </div>
+        <h3 style="font-size:22px;font-weight:700;color:#ffffff;margin:0 0 6px;">Partner with SHIFT 2026</h3>
+        <p style="font-size:13px;color:#c4c2c3;margin:0;line-height:1.55;">
+          Are you looking to anchor the summit as a corporate partner, or would you like to register as an executive delegate?
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button type="button" id="partner-proceed-btn" class="btn-pill-white" style="width:100%;height:46px;">Proceed with Corporate Partnership</button>
+        <button type="button" id="partner-redirect-to-reg-btn" class="btn-pill-dark" style="width:100%;height:46px;">Register as Individual Delegate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Partner Application Form Modal -->
+  <div class="modal-overlay" id="modal-partner-form" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="margin-bottom:20px;">
+        <span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.08em;">Corporate Inquiries</span>
+        <h3 style="font-size:22px;font-weight:700;color:#ffffff;margin:4px 0 6px;">Partnership Proposal</h3>
+        <p style="font-size:13px;color:#c4c2c3;margin:0;">Connect your organization with 150+ builders and founders.</p>
+      </div>
+      <form id="partner-form">
+        <div class="form-group">
+          <label class="form-label" for="partner-company">Company / Organization *</label>
+          <input type="text" id="partner-company" class="form-input" required placeholder="Acme Enterprises" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="partner-contact">Contact Person Name *</label>
+          <input type="text" id="partner-contact" class="form-input" required placeholder="Alex Vance" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="partner-email">Corporate Email *</label>
+          <input type="email" id="partner-email" class="form-input" required placeholder="alex@acme.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="partner-phone">Phone Number</label>
+          <input type="tel" id="partner-phone" class="form-input" placeholder="+216 00 000 000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="partner-message">Partnership Objectives</label>
+          <textarea id="partner-message" class="form-textarea" rows="3" placeholder="Tell us how you'd like to collaborate..."></textarea>
+        </div>
+        <div id="partner-form-message" style="display:none;font-size:13px;margin-bottom:12px;"></div>
+        <button type="submit" class="btn-pill-white" style="width:100%;height:46px;">Submit Application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Partner Verification Modal -->
+  <div class="modal-overlay" id="modal-partner-verification" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;padding:12px 0;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(159,213,75,0.15);border:1px solid var(--primary-lime);display:grid;place-items:center;margin:0 auto 12px;color:var(--primary-lime);font-size:22px;">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 style="font-size:22px;font-weight:700;color:#ffffff;margin:0 0 8px;">Inquiry Received</h3>
+        <p style="font-size:14px;color:#c4c2c3;line-height:1.6;margin:0 0 16px;">
+          Thank you, <span id="verif-partner-contact" style="color:#ffffff;font-weight:600;">Representative</span>. The corporate partnerships team for <span id="verif-partner-company" style="color:#ffffff;font-weight:600;">Company</span> will review your application and send the official sponsorship dossier within 24 hours.
+        </p>
+        <button type="button" class="btn-pill-dark modal-close-btn" style="position:static;display:inline-flex;height:42px;padding:0 22px;border-radius:999px;">Back to Summit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. SHIFT AI CONCIERGE CHATBOT WIDGET -->
+  <div id="shift-chat-widget" class="shift-chat-widget">
+    <!-- Teaser Pill -->
+    <div id="chat-teaser-pill" class="chat-teaser-pill" role="button" tabindex="0" title="Open SHIFT AI Concierge">
+      <span class="teaser-dot"></span>
+      <span class="teaser-text">Ask SHIFT AI Concierge</span>
+    </div>
+
+    <!-- Launcher Button -->
+    <button type="button" id="chat-launcher-btn" class="chat-launcher-btn" aria-label="Open SHIFT AI Concierge" aria-expanded="false" title="Chat with SHIFT AI Concierge">
+      <div class="launcher-icon-wrapper">
+        <i class="fa-solid fa-comment-dots chat-icon-open"></i>
+        <i class="fa-solid fa-xmark chat-icon-close"></i>
+      </div>
+      <span class="chat-launcher-pulse"></span>
+      <span class="chat-launcher-badge">AI</span>
+    </button>
+
+    <!-- Chat Window Panel -->
+    <div id="chat-panel" class="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chat-panel-title">
+      <!-- Header -->
+      <div class="chat-panel-header">
+        <div class="chat-header-identity">
+          <div class="chat-avatar">
+            <i class="fa-solid fa-sparkles"></i>
+            <span class="chat-status-indicator"></span>
+          </div>
+          <div class="chat-header-meta">
+            <h3 id="chat-panel-title" class="chat-header-title">SHIFT AI Concierge</h3>
+            <p class="chat-header-subtitle">Where Business Meets AI · Nov 28, 2026</p>
+          </div>
+        </div>
+        <div class="chat-header-actions">
+          <button type="button" id="chat-clear-btn" class="chat-header-icon-btn" title="Reset conversation" aria-label="Reset conversation">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button type="button" id="chat-close-btn" class="chat-header-icon-btn" title="Minimize chat" aria-label="Minimize chat">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Message Stream -->
+      <div id="chat-messages" class="chat-messages" role="log" aria-live="polite">
+        <!-- Initial Welcome Message from Bot -->
+        <div class="chat-msg chat-msg-bot">
+          <div class="chat-msg-avatar">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <div class="chat-msg-bubble">
+            <p><strong>Welcome to SHIFT 2026!</strong></p>
+            <p>I'm your official summit concierge, organized by <strong>AIESEC in Bardo</strong>. Ask me anything about our event at <strong>HIDE University</strong> on <strong>28 November 2026</strong>, real-world business AI topics, getting your pass, or corporate partnerships.</p>
+          </div>
+        </div>
+
+        <!-- Suggestion Chips -->
+        <div class="chat-chips-container" id="chat-quick-chips">
+          <span class="chips-label">Popular questions:</span>
+          <div class="chips-scroll">
+            <button type="button" class="chat-chip" data-prompt="What is SHIFT and what makes it unique?">💡 What is SHIFT?</button>
+            <button type="button" class="chat-chip" data-prompt="When and where is SHIFT happening?">📍 When &amp; Where?</button>
+            <button type="button" class="chat-chip" data-prompt="Who is organizing the event?">🏛️ Who organizes it?</button>
+            <button type="button" class="chat-chip" data-prompt="What topics and activities are scheduled in the agenda?">📅 Summit Agenda</button>
+            <button type="button" class="chat-chip" data-prompt="How do I get my Summit Pass with instant QR code?">🎟️ How to get a pass?</button>
+            <button type="button" class="chat-chip" data-prompt="How can our organization become a corporate partner or sponsor?">🤝 Become a Partner</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Form -->
+      <form id="chat-input-form" class="chat-input-form">
+        <div class="chat-input-wrapper">
+          <input 
+            type="text" 
+            id="chat-user-input" 
+            class="chat-user-input" 
+            placeholder="Ask anything about SHIFT 2026..." 
+            autocomplete="off" 
+            maxlength="500" 
+            required 
+          />
+          <button type="submit" id="chat-send-btn" class="chat-send-btn" aria-label="Send message">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="chat-input-footer">
+          <span>Powered by Gemini 3.8 Flash · AIESEC in Bardo</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CDN Scripts for Supabase and QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

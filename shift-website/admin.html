@@ -630,31 +630,60 @@ Live 10-minute executive Q&amp;A"></textarea>
 
     <!-- SPEAKERS TAB -->
     <section class="tab-panel active" id="panel-speakers">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Speakers</h2>
-        <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="speakers">+ Add speaker</button>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+        <div>
+          <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Speakers</h2>
+          <p class="font-body-sm text-body-sm text-text-muted">Featured speakers and keynotes presented across the summit.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="speakers" title="Import default summit speakers from the website into database">
+            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
+            <span>Sync Website Speakers</span>
+          </button>
+          <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="speakers">+ Add speaker</button>
+        </div>
       </div>
+      <div id="sync-notice-speakers" class="hidden mb-4 p-3 rounded-lg bg-surface-card border border-primary-container/30 text-body-sm text-text-primary flex items-center justify-between"></div>
       <div id="form-speakers" class="hidden bg-surface-card border border-surface-border rounded-xl p-6 mb-6"></div>
       <div id="list-speakers" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
     <!-- TEAM TAB -->
     <section class="tab-panel" id="panel-team">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Organizing Team</h2>
-        <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="team_members">+ Add team member</button>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+        <div>
+          <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Organizing Team</h2>
+          <p class="font-body-sm text-body-sm text-text-muted">AIESEC in Bardo Organizing Committee members displayed on the website.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="team_members" title="Import default organizing committee team members from the website into database">
+            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
+            <span>Sync Website Team</span>
+          </button>
+          <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="team_members">+ Add team member</button>
+        </div>
       </div>
+      <div id="sync-notice-team_members" class="hidden mb-4 p-3 rounded-lg bg-surface-card border border-primary-container/30 text-body-sm text-text-primary flex items-center justify-between"></div>
       <div id="form-team_members" class="hidden bg-surface-card border border-surface-border rounded-xl p-6 mb-6"></div>
       <div id="list-team_members" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
     <!-- PARTNERS (DISPLAYED) TAB -->
     <section class="tab-panel" id="panel-partners">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Displayed Partners</h2>
-        <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="partners">+ Add partner logo</button>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+        <div>
+          <h2 class="font-headline-lg text-headline-lg text-text-primary font-bold">Displayed Partners</h2>
+          <p class="font-body-sm text-body-sm text-text-muted">Corporate and institutional partners featured on the summit website.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="partners" title="Import default partner companies from the website into database">
+            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
+            <span>Sync Website Partners</span>
+          </button>
+          <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="partners">+ Add partner logo</button>
+        </div>
       </div>
-      <p class="font-body-sm text-body-sm text-text-muted mb-4">These are the logos shown in the "Trusted By" strip on the site. Companies that apply through the website land in the "Partner Applications" tab first — approve them there, then add their logo here.</p>
+      <div id="sync-notice-partners" class="hidden mb-4 p-3 rounded-lg bg-surface-card border border-primary-container/30 text-body-sm text-text-primary flex items-center justify-between"></div>
       <div id="form-partners" class="hidden bg-surface-card border border-surface-border rounded-xl p-6 mb-6"></div>
       <div id="list-partners" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </section>
