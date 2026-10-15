@@ -58,7 +58,7 @@
       "Restructuring enterprise workflows around autonomous agent workforces",
       "Live 10-minute executive Q&A directly with the keynote speaker"
     ],
-    "host_name": "Executive Keynote Speaker",
+    "host_name": "Keynote Speaker (TBA)",
     "host_role": "Founder & CEO · Enterprise AI Scaleup",
     "host_category": "Keynote Speaker",
     "host_initials": "KS",
@@ -104,7 +104,7 @@
       "Data governance hurdles and mitigating compliance friction in regulated industries",
       "Live telemetry metrics comparing pre-AI vs post-AI turnaround speeds"
     ],
-    "host_name": "Enterprise Growth Architect",
+    "host_name": "Enterprise Speaker (TBA)",
     "host_role": "Head of Growth & Automation · Fintech Scaleup",
     "host_category": "Case Speaker",
     "host_initials": "EA",
@@ -173,7 +173,7 @@
       "Fine-tuning vs continuous context caching cost-benefit breakdowns",
       "Hardening LLM security against prompt injection in production backends"
     ],
-    "host_name": "Lead Product Architect",
+    "host_name": "Technical Lead (TBA)",
     "host_role": "Deep Learning Infrastructure & Systems",
     "host_category": "Featured Architect",
     "host_initials": "LP",
@@ -242,7 +242,7 @@
       "Designing resilient prompt chains with human-in-the-loop validation",
       "Real-time feedback and review by enterprise AI transformation coaches"
     ],
-    "host_name": "AI Transformation Director",
+    "host_name": "Workshop Leader (TBA)",
     "host_role": "Advisory & Transformational Operations",
     "host_category": "Lab Facilitator",
     "host_initials": "AT",
@@ -265,7 +265,7 @@
       "Publication release of the summit collective white paper",
       "Closing ceremony and recognition of institutional delegators"
     ],
-    "host_name": "Global Systems Strategist",
+    "host_name": "Closing Speaker (TBA)",
     "host_role": "Serial Tech Entrepreneur & AI Research Fellow",
     "host_category": "Closing Perspective",
     "host_initials": "GS",

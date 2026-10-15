@@ -45,6 +45,35 @@ function showApp(session) {
     emailEl.textContent = session.user.email;
     emailEl.classList.remove("hidden");
   }
+
+  // Auto-clean any legacy test entries in Supabase
+  if (supabaseClient) {
+    const TEST_TEAM_IDS = [
+      "c4cab719-10f3-4d8f-a5ac-1cfb40526df4", // Sarra Ben Amor
+      "e60f4531-a428-4238-a201-f3b4e41e3828", // Yassine Mansour
+      "db6fc0b7-bd62-419f-ad29-6486261bda6d", // Ines Trabelsi
+      "cf31261b-4d47-4111-a630-6c478b606052"  // Mohamed Dridi
+    ];
+    const TEST_SPEAKER_IDS = [
+      "ce3a88e4-5117-4375-8408-776688a8549b", // Executive Keynote Speaker
+      "cbe1cf16-59a2-4374-b32d-0726d242900f", // Dr. Leila Ben Salem
+      "ecf97ce1-9d11-49ff-ba14-bb1db3f67f51", // Omar Cherif
+      "d5a14603-225b-4967-9abd-3612026928e3"  // Sonia Haddad
+    ];
+    const TEST_PARTNER_IDS = [
+      "7c33ea85-0c66-4146-bf96-e2819b34b374", // Enterprise AI Alliance
+      "7ad1aa2e-41d9-4905-9eca-80cbfe4ea741", // Cloud Compute Labs
+      "d538c1bc-0781-4a62-8f3e-256e7ef8555d", // Autonomous Systems Group
+      "9d70a8e9-4c94-4338-8287-499f7ebe25a6", // Venture EMEA Capital
+      "453ca534-bd2a-40d3-813f-a3cbe13cab5b", // Nordic Neural Works
+      "ee848f31-6dbe-4bfd-ba3a-5df38116a6fe"  // Tunisia Digital Matrix
+    ];
+
+    supabaseClient.from("team_members").delete().in("id", TEST_TEAM_IDS).then(() => loadEntity("team_members")).catch(() => {});
+    supabaseClient.from("speakers").delete().in("id", TEST_SPEAKER_IDS).then(() => loadEntity("speakers")).catch(() => {});
+    supabaseClient.from("partners").delete().in("id", TEST_PARTNER_IDS).then(() => loadEntity("partners")).catch(() => {});
+  }
+
   loadAll();
 }
 
@@ -293,66 +322,10 @@ function initials(name) {
 const DEFAULT_ENTITIES = {
   team_members: [
     { name: "Amen Krifi", role: "Organizing Committee President", linkedin_url: "https://www.linkedin.com/", sort_order: 1, published: true },
-    { name: "Sarra Ben Amor", role: "VP Corporate Relations & Partnerships", linkedin_url: "https://www.linkedin.com/", sort_order: 2, published: true },
-    { name: "Yassine Mansour", role: "VP Marketing & Communications", linkedin_url: "https://www.linkedin.com/", sort_order: 3, published: true },
-    { name: "Ines Trabelsi", role: "VP Logistics & Venue Operations", linkedin_url: "https://www.linkedin.com/", sort_order: 4, published: true },
-    { name: "Mohamed Dridi", role: "VP Delegate Experience & Strategy", linkedin_url: "https://www.linkedin.com/", sort_order: 5, published: true },
-    { name: "Khalil Jbari", role: "Organizing Committee Leadership", linkedin_url: "", sort_order: 6, published: true },
+    { name: "Khalil Jbari", role: "Organizing Committee Leadership", linkedin_url: "", sort_order: 2, published: true },
   ],
-  partners: [
-    { name: "Enterprise AI Alliance", tier: "Anchor Partner", website_url: "", sort_order: 1, published: true },
-    { name: "Cloud Compute Labs", tier: "Infrastructure", website_url: "", sort_order: 2, published: true },
-    { name: "Autonomous Systems Group", tier: "Intelligence", website_url: "", sort_order: 3, published: true },
-    { name: "Venture EMEA Capital", tier: "Investment", website_url: "", sort_order: 4, published: true },
-    { name: "Nordic Neural Works", tier: "Research", website_url: "", sort_order: 5, published: true },
-    { name: "Tunisia Digital Matrix", tier: "Ecosystem", website_url: "", sort_order: 6, published: true },
-  ],
-  speakers: [
-    {
-      name: "Executive Keynote Speaker",
-      role: "Founder & CEO",
-      company: "Leading Enterprise Scaleup",
-      badge: "Keynote Address",
-      session_title: "AI Is Changing Business",
-      bio: "Serial entrepreneur and technology leader with 15+ years scaling B2B enterprise software and operational intelligence platforms across EMEA and North Africa.",
-      linkedin_url: "https://www.linkedin.com/",
-      sort_order: 1,
-      published: true,
-    },
-    {
-      name: "Dr. Leila Ben Salem",
-      role: "Head of AI Research & Architecture",
-      company: "Neural Systems Lab",
-      badge: "Technical Keynote",
-      session_title: "Applied Generative Architectures & Business ROI",
-      bio: "Researcher specializing in distributed AI systems and modern neural network deployment.",
-      linkedin_url: "https://www.linkedin.com/",
-      sort_order: 2,
-      published: true,
-    },
-    {
-      name: "Omar Cherif",
-      role: "Managing Partner",
-      company: "Venture AI Capital",
-      badge: "Panel Moderator",
-      session_title: "Financing North African AI Champions",
-      bio: "Venture investor focused on early-stage AI startups across the Mediterranean and North Africa.",
-      linkedin_url: "https://www.linkedin.com/",
-      sort_order: 3,
-      published: true,
-    },
-    {
-      name: "Sonia Haddad",
-      role: "VP Enterprise Digital Transformation",
-      company: "Mediterranean Financial Group",
-      badge: "Executive Panel",
-      session_title: "Operational AI Governance in Regulated Markets",
-      bio: "Executive leading AI governance, compliance, and enterprise risk management.",
-      linkedin_url: "https://www.linkedin.com/",
-      sort_order: 4,
-      published: true,
-    },
-  ],
+  partners: [],
+  speakers: [],
 };
 
 let isSyncingDefaults = { speakers: false, team_members: false, partners: false };
@@ -471,61 +444,86 @@ async function loadEntity(entityKey) {
           ...item,
           name: "Khalil Jbari",
           role: item.role || "Organizing Committee Leadership",
-          sort_order: item.sort_order || 6,
+          sort_order: item.sort_order || 2,
         };
       }
     }
     return item;
   });
 
-  const existingNames = new Set((data || []).map((r) => (r.name || "").toLowerCase().trim()));
-  const missingDefaults = defaults.filter((d) => {
-    const dName = d.name.toLowerCase().trim();
-    if (existingNames.has(dName)) return false;
-    if (dName.includes("amen") && (existingNames.has("amen") || existingNames.has("amen krifi"))) return false;
-    if (dName.includes("khalil") && Array.from(existingNames).some((n) => n.includes("khalil"))) return false;
+  // Filter out any test entities completely
+  const TEST_SPEAKER_NAMES = new Set([
+    "executive keynote speaker",
+    "dr. leila ben salem",
+    "omar cherif",
+    "sonia haddad",
+    "enterprise growth architect",
+    "lead product architect",
+    "venture capital partner",
+    "ai transformation director",
+    "global systems strategist"
+  ]);
+  const TEST_SPEAKER_IDS = new Set([
+    "ce3a88e4-5117-4375-8408-776688a8549b",
+    "cbe1cf16-59a2-4374-b32d-0726d242900f",
+    "ecf97ce1-9d11-49ff-ba14-bb1db3f67f51",
+    "d5a14603-225b-4967-9abd-3612026928e3"
+  ]);
+
+  const TEST_PARTNER_NAMES = new Set([
+    "enterprise ai alliance",
+    "cloud compute labs",
+    "autonomous systems group",
+    "venture emea capital",
+    "nordic neural works",
+    "tunisia digital matrix"
+  ]);
+  const TEST_PARTNER_IDS = new Set([
+    "7c33ea85-0c66-4146-bf96-e2819b34b374",
+    "7ad1aa2e-41d9-4905-9eca-80cbfe4ea741",
+    "d538c1bc-0781-4a62-8f3e-256e7ef8555d",
+    "9d70a8e9-4c94-4338-8287-499f7ebe25a6",
+    "453ca534-bd2a-40d3-813f-a3cbe13cab5b",
+    "ee848f31-6dbe-4bfd-ba3a-5df38116a6fe"
+  ]);
+
+  const TEST_TEAM_NAMES = new Set([
+    "sarra ben amor",
+    "yassine mansour",
+    "ines trabelsi",
+    "mohamed dridi"
+  ]);
+  const TEST_TEAM_IDS = new Set([
+    "c4cab719-10f3-4d8f-a5ac-1cfb40526df4",
+    "e60f4531-a428-4238-a201-f3b4e41e3828",
+    "db6fc0b7-bd62-419f-ad29-6486261bda6d",
+    "cf31261b-4d47-4111-a630-6c478b606052"
+  ]);
+
+  let deletedIds = new Set();
+  try {
+    deletedIds = new Set(JSON.parse(localStorage.getItem("shift_deleted_" + entityKey) || "[]"));
+  } catch (e) {}
+
+  data = data.filter((item) => {
+    const rawName = (item.name || "").toLowerCase().trim();
+    if (deletedIds.has(item.id)) return false;
+
+    if (entityKey === "team_members") {
+      if (TEST_TEAM_NAMES.has(rawName) || TEST_TEAM_IDS.has(item.id)) return false;
+    } else if (entityKey === "speakers") {
+      if (TEST_SPEAKER_NAMES.has(rawName) || TEST_SPEAKER_IDS.has(item.id)) return false;
+    } else if (entityKey === "partners") {
+      if (TEST_PARTNER_NAMES.has(rawName) || TEST_PARTNER_IDS.has(item.id)) return false;
+    }
     return true;
   });
 
-  // Silent automatic sync if admin is authenticated and defaults are missing
-  if (supabaseClient && missingDefaults.length > 0) {
-    try {
-      const { data: authData } = await supabaseClient.auth.getSession();
-      if (authData?.session?.user) {
-        syncDefaults(entityKey, false);
-      }
-    } catch (e) {}
-  }
-
-  // Combine database data and website defaults so admin ALWAYS finds all team members and partners
+  // Display pure authoritative rows
   let displayRows = [...data];
-  if (displayRows.length === 0 && defaults.length > 0) {
-    displayRows = defaults.map((d, i) => ({
-      ...d,
-      id: `default-${i}`,
-      isDefault: true,
-    }));
-    const noticeEl = document.getElementById(`sync-notice-${entityKey}`);
-    if (noticeEl) {
-      noticeEl.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary-container text-[20px]">info</span>
-          <span>Loaded website ${cfg.label}s. Click <strong>Sync Website ${entityKey === "team_members" ? "Team" : entityKey === "partners" ? "Partners" : "Speakers"}</strong> to store them permanently into the database.</span>
-        </div>
-      `;
-      noticeEl.classList.remove("hidden");
-    }
-  } else if (displayRows.length > 0 && missingDefaults.length > 0) {
-    const syntheticDefaults = missingDefaults.map((d, i) => ({
-      ...d,
-      id: `default-${i}`,
-      isDefault: true,
-    }));
-    displayRows = [...displayRows, ...syntheticDefaults];
-  }
 
   if (displayRows.length === 0) {
-    list.innerHTML = `<p class="text-text-muted text-body-sm col-span-full">No ${cfg.label}s yet. Click "+ Add" or "Sync Website" to import defaults.</p>`;
+    list.innerHTML = `<p class="text-text-muted text-body-sm col-span-full py-8 text-center bg-surface-card/60 rounded-xl border border-surface-border">No ${cfg.label}s configured. Click "+ Add ${cfg.label}" to add a new ${cfg.label.toLowerCase()}.</p>`;
     return;
   }
 
@@ -568,16 +566,35 @@ async function loadEntity(entityKey) {
   list.querySelectorAll(".delete-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
-      if (String(id).startsWith("default-")) {
-        displayRows = displayRows.filter((r) => String(r.id) !== String(id));
-        btn.closest(".bg-surface-card").remove();
-        return;
-      }
       if (!confirm("Delete this entry? This cannot be undone.")) return;
+
+      // 1. Immediately store in persistent blacklist so it can never reappear
+      try {
+        const key = "shift_deleted_" + entityKey;
+        const cur = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!cur.includes(id)) {
+          cur.push(id);
+          localStorage.setItem(key, JSON.stringify(cur));
+        }
+      } catch (e) {}
+
+      // 2. Remove card from DOM immediately
+      const card = btn.closest(".bg-surface-card");
+      if (card) card.remove();
+
+      // 3. Persist delete to Supabase if connected
       if (supabaseClient) {
-        await supabaseClient.from(cfg.table).delete().eq("id", id);
-        loadEntity(entityKey);
+        try {
+          const { error } = await supabaseClient.from(cfg.table).delete().eq("id", id);
+          if (error) {
+            console.warn("Supabase delete note:", error.message);
+          }
+        } catch (e) {
+          console.warn("Supabase delete failed:", e);
+        }
       }
+
+      loadEntity(entityKey);
     })
   );
 }
@@ -1120,22 +1137,24 @@ function renderApplicantsTable() {
       }
 
       // Optimistically remove from cache
-      applicantsCache = applicantsCache.filter((a) => a.id !== id);
+      applicantsCache = applicantsCache.filter((a) => String(a.id) !== String(id) && a.email !== id);
       updateUniversityDropdownOptions();
       updateMetricsDashboard();
       renderApplicantsTable();
 
-      // Persist delete to Supabase if connected and ID is a valid database UUID
-      if (supabaseClient && isUuid(id)) {
+      // 1. Delete from server applicants.json
+      try {
+        await fetch(`/api/applicants/${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch (err) {
+        console.warn("Error removing applicant from server:", err);
+      }
+
+      // 2. Persist delete to Supabase if connected
+      if (supabaseClient) {
         try {
-          const { error } = await supabaseClient.from("applicants").delete().eq("id", id);
-          if (error) {
-            console.error("Error removing applicant from Supabase:", error);
-            alert("Could not remove from database: " + error.message);
-            loadApplicants(); // rollback
-          }
+          await supabaseClient.from("applicants").delete().eq("id", id);
         } catch (err) {
-          console.warn("Error removing applicant:", err);
+          console.warn("Error removing applicant from Supabase:", err);
         }
       }
     });
@@ -1166,23 +1185,6 @@ function initApplicantFilters() {
     });
   }
 }
-
-const SAMPLE_DELEGATES = [
-  { id: "del-01", full_name: "Yassine Ben Amor", email: "yassine.ba@insat.ucar.tn", phone: "+216 98 421 803", university: "INSAT", faculty: "Computer Science & AI", status: "attended", confirmation_sent: true, reminder_sent_at: "2026-11-20T10:00:00Z", created_at: "2026-11-12T14:32:00Z" },
-  { id: "del-02", full_name: "Sarra Mansouri", email: "sarra.mansouri@tbs.rnu.tn", phone: "+216 22 519 330", university: "Tunis Business School", faculty: "Business Analytics", status: "registered", confirmation_sent: true, reminder_sent_at: null, created_at: "2026-11-13T09:15:00Z" },
-  { id: "del-03", full_name: "Dr. Mehdi Karray", email: "m.karray@dauphine.tn", phone: "+216 55 901 244", university: "Paris-Dauphine Tunis", faculty: "Executive Finance & AI", status: "vip", confirmation_sent: true, reminder_sent_at: "2026-11-20T10:00:00Z", created_at: "2026-11-14T11:40:00Z" },
-  { id: "del-04", full_name: "Ines Riahi", email: "ines.riahi@enit.utm.tn", phone: "+216 24 118 792", university: "ENIT", faculty: "Telecommunications", status: "attended", confirmation_sent: true, reminder_sent_at: "2026-11-20T10:00:00Z", created_at: "2026-11-15T16:20:00Z" },
-  { id: "del-05", full_name: "Karim Chaabane", email: "k.chaabane@esprit.tn", phone: "+216 97 340 551", university: "ESPRIT", faculty: "Software Engineering", status: "registered", confirmation_sent: true, reminder_sent_at: null, created_at: "2026-11-16T08:50:00Z" },
-  { id: "del-06", full_name: "Nourhene Trabelsi", email: "nourhene.tr@msb.tn", phone: "+216 50 622 189", university: "MSB (Mediterranean School of Business)", faculty: "Strategy & Tech Leadership", status: "attended", confirmation_sent: true, reminder_sent_at: "2026-11-20T10:00:00Z", created_at: "2026-11-17T13:10:00Z" },
-  { id: "del-07", full_name: "Amine Bouazizi", email: "amine.b@biat.com.tn", phone: "+216 99 715 004", university: "BIAT Labs", faculty: "Digital Banking", status: "vip", confirmation_sent: true, reminder_sent_at: "2026-11-20T10:00:00Z", created_at: "2026-11-18T10:05:00Z" },
-  { id: "del-08", full_name: "Salma Haddad", email: "salma.haddad@insat.ucar.tn", phone: "+216 21 884 920", university: "INSAT", faculty: "Data Science", status: "registered", confirmation_sent: true, reminder_sent_at: null, created_at: "2026-11-19T17:45:00Z" }
-];
-
-const SAMPLE_PARTNERS = [
-  { id: "part-01", company_name: "Telnet Holding", contact_name: "Mohamed Frikha", email: "partnerships@groupe-telnet.com", phone: "+216 71 860 233", message: "Interested in the Gold Tier sponsorship and participating in the AI Infrastructure panel.", status: "approved", created_at: "2026-11-10T11:00:00Z" },
-  { id: "part-02", company_name: "InstaDeep Labs", contact_name: "Leila Baccouche", email: "l.baccouche@instadeep.com", phone: "+216 71 900 120", message: "Looking forward to hosting an executive technical workshop on decision-making models.", status: "contacted", created_at: "2026-11-14T15:20:00Z" },
-  { id: "part-03", company_name: "Vermeg Tech", contact_name: "Tarek Jaziri", email: "tjaziri@vermeg.com", phone: "+216 70 020 500", message: "Interested in talent acquisition booth and connecting with AI engineering graduates.", status: "new", created_at: "2026-11-18T09:40:00Z" }
-];
 
 async function loadApplicants() {
   let records = [];
@@ -1224,11 +1226,7 @@ async function loadApplicants() {
     }
   }
 
-  // Only fall back to sample delegates if completely empty
-  if (!dbSuccess && records.length === 0) {
-    records = [...SAMPLE_DELEGATES];
-  }
-
+  // Pure data: no test/sample delegates injected
   applicantsCache = records;
   updateUniversityDropdownOptions();
   updateMetricsDashboard();
@@ -1257,6 +1255,30 @@ document.getElementById("send-reminders-btn").addEventListener("click", async ()
     statusEl.textContent = "Email function not active. Direct database storage is working.";
   }
 });
+
+// CLEAR ALL APPLICANTS
+const clearApplicantsBtn = document.getElementById("clear-applicants-btn");
+if (clearApplicantsBtn) {
+  clearApplicantsBtn.addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to remove all applicants? This will wipe all test applicants and cannot be undone.")) return;
+    try {
+      await fetch("/api/applicants", { method: "DELETE" });
+    } catch (e) {
+      console.warn("Clear server applicants error:", e);
+    }
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("applicants").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      } catch (e) {
+        console.warn("Clear Supabase applicants error:", e);
+      }
+    }
+    applicantsCache = [];
+    updateUniversityDropdownOptions();
+    updateMetricsDashboard();
+    renderApplicantsTable();
+  });
+}
 
 // 1-CLICK CSV EXPORT FOR CHECK-IN (APPLICANTS)
 document.getElementById("export-applicants-btn").addEventListener("click", () => {
@@ -1324,11 +1346,7 @@ async function loadPartnerRequests() {
     }
   }
 
-  // Only fall back to sample partners if Supabase is completely unavailable
-  if (!dbSuccess && !supabaseClient && records.length === 0) {
-    records = [...SAMPLE_PARTNERS];
-  }
-
+  // Pure data: no test partner applications
   partnerRequestsCache = records;
   document.getElementById("partner-requests-count").textContent = `(${partnerRequestsCache.length})`;
   updateMetricsDashboard();

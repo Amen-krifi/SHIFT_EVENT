@@ -505,74 +505,33 @@ async function loadAgenda() {
 // ---------------------------------------------------------------------------
 // 6) SPEAKERS DATA & MODAL
 // ---------------------------------------------------------------------------
-const CURATED_SPEAKERS = [
-  {
-    name: "Executive Keynote Speaker",
-    role: "Founder & CEO",
-    company: "Leading Enterprise Scaleup",
-    badge: "Keynote Address",
-    time: "10:15 – 11:00",
-    session_title: "AI Is Changing Business",
-    abstract: "Unpacking macro AI adoption across enterprise structures, ROI calculation models, capital allocation shifts, and navigating technical debt when transitioning legacy infrastructure to modern neural stacks.",
-    bio: "Serial entrepreneur and technology leader with 15+ years scaling B2B enterprise software and operational intelligence platforms across EMEA and North Africa.",
-    linkedin_url: "https://www.linkedin.com/"
-  },
-  {
-    name: "Enterprise Growth Architect",
-    role: "Head of Growth & Automation",
-    company: "Fintech & Automation Platform",
-    badge: "Case Studies",
-    time: "11:30 – 12:15",
-    session_title: "AI in the Real World",
-    abstract: "Real data from 50+ enterprise rollouts. An unflinching analysis of what works in automated underwriting, risk modelling, customer intelligence workflows, and why 80% of experimental POCs fail before reaching production.",
-    bio: "Oversees automation and product scalability in banking and transaction processing platforms, bridging software engineering and business development.",
-    linkedin_url: "https://www.linkedin.com/"
-  },
-  {
-    name: "Lead Product Architect",
-    role: "Product & Infrastructure Lead",
-    company: "Deep Learning Infrastructure",
-    badge: "Product Systems",
-    time: "13:45 – 14:30",
-    session_title: "Building with AI, Not Just Talking About It",
-    abstract: "A deep dive into concrete architecture blueprints: low-latency model serving, agentic orchestration pipelines, fine-tuning vs. prompt-context tradeoffs, and keeping cloud costs under strict executive control.",
-    bio: "Engineering architect specialized in distributed systems and production machine learning pipelines, advising international venture scaleups.",
-    linkedin_url: "https://www.linkedin.com/"
-  },
-  {
-    name: "Venture Capital Partner",
-    role: "Managing Partner",
-    company: "Pan-African Venture Capital",
-    badge: "Grand Panelist",
-    time: "14:30 – 15:15",
-    session_title: "The Big Conversation: Board Level Strategy",
-    abstract: "C-suite debate exploring sovereign AI capabilities, regional talent retention, how capital allocators assess artificial intelligence moats, and the strategic positioning of emerging tech hubs in Tunisia.",
-    bio: "Veteran venture capitalist and angel investor backing high-growth technology companies across Africa and the Mediterranean basin.",
-    linkedin_url: "https://www.linkedin.com/"
-  },
-  {
-    name: "AI Transformation Director",
-    role: "AI Strategy Consultant",
-    company: "Advisory & Transformational Operations",
-    badge: "Practical Lab",
-    time: "15:45 – 16:30",
-    session_title: "Your Business, SHIFTed: Hands-on Frameworks",
-    abstract: "An interactive, practical workshop demonstrating how to audit enterprise friction points, map them to AI-augmented workflows, and establish measurable KPIs for immediate operational gains.",
-    bio: "Consultant and transformation lead who has advised tier-1 telecom, banking, and retail corporations on workforce readiness and digital capability evolution.",
-    linkedin_url: "https://www.linkedin.com/"
-  },
-  {
-    name: "Global Systems Strategist",
-    role: "Serial Tech Entrepreneur",
-    company: "Global Systems Architect",
-    badge: "Closing Perspective",
-    time: "16:30 – 17:15",
-    session_title: "What Comes Next? & 2027 Vision",
-    abstract: "Forward-looking synthesis on frontier model trajectories, embodied AI, robotics, multimodal reasoning, and closing recommendations for tomorrow's executive leaders.",
-    bio: "Pioneer in artificial intelligence research and commercial deployment with extensive advisory experience for technology ministries and research labs.",
-    linkedin_url: "https://www.linkedin.com/"
+const CURATED_SPEAKERS = [];
+
+const TEST_SPEAKER_NAMES = new Set([
+  "executive keynote speaker",
+  "dr. leila ben salem",
+  "omar cherif",
+  "sonia haddad",
+  "enterprise growth architect",
+  "lead product architect",
+  "venture capital partner",
+  "ai transformation director",
+  "global systems strategist"
+]);
+const TEST_SPEAKER_IDS = new Set([
+  "ce3a88e4-5117-4375-8408-776688a8549b",
+  "cbe1cf16-59a2-4374-b32d-0726d242900f",
+  "ecf97ce1-9d11-49ff-ba14-bb1db3f67f51",
+  "d5a14603-225b-4967-9abd-3612026928e3"
+]);
+
+function getDeletedItemIds(entityKey) {
+  try {
+    return new Set(JSON.parse(localStorage.getItem("shift_deleted_" + entityKey) || "[]"));
+  } catch (e) {
+    return new Set();
   }
-];
+}
 
 function openSpeakerModal(speaker) {
   if (!speaker) return;
@@ -619,10 +578,7 @@ function openSpeakerModal(speaker) {
 function bindSpeakerCards() {
   document.querySelectorAll(".speaker-card").forEach(card => {
     card.addEventListener("click", () => {
-      const idx = card.dataset.index;
-      if (idx !== undefined && CURATED_SPEAKERS[idx]) {
-        openSpeakerModal(CURATED_SPEAKERS[idx]);
-      } else if (card.dataset.id && loadedSpeakersList.length) {
+      if (card.dataset.id && loadedSpeakersList.length) {
         const found = loadedSpeakersList.find(s => s.id === card.dataset.id);
         if (found) openSpeakerModal(found);
       }
@@ -634,6 +590,9 @@ async function loadSpeakers() {
   const container = document.getElementById("speakers-container");
   if (!container) return;
 
+  const deletedIds = getDeletedItemIds("speakers");
+  let validSpeakers = [];
+
   const client = window.supabaseClient || (typeof supabaseClient !== "undefined" ? supabaseClient : null);
   if (client) {
     try {
@@ -643,67 +602,81 @@ async function loadSpeakers() {
         .eq("published", true)
         .order("sort_order", { ascending: true });
 
-      if (!error && data && data.length > 0) {
-        loadedSpeakersList = data;
-        container.innerHTML = data.map((s) => `
-          <div class="speaker-card" data-id="${s.id}">
-            <div>
-              <div class="speaker-avatar-box">
-                ${s.photo_url ? `<img src="${escapeHtml(s.photo_url)}" alt="${escapeHtml(s.name)}"/>` : `<span style="font-size:32px;font-weight:bold;color:var(--primary-lime);">${escapeHtml(initials(s.name))}</span>`}
-              </div>
-              ${s.badge ? `<span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.06em;">${escapeHtml(s.badge)}</span>` : ""}
-              <h3 style="font-size:17px;font-weight:700;color:#ffffff;margin:4px 0 2px;">${escapeHtml(s.name)}</h3>
-              <p style="font-size:13px;color:#c4c2c3;margin:0;">${escapeHtml(s.role || "")}</p>
-              <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(s.company || "")}</p>
-            </div>
-            <div style="margin-top:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;color:var(--primary-lime);font-size:12px;font-weight:600;">
-              <span>Session: ${escapeHtml(s.session_title || "View Details")}</span>
-              <i class="fa-solid fa-arrow-right"></i>
-            </div>
-          </div>
-        `).join("");
-        bindSpeakerCards();
-        return;
+      if (!error && Array.isArray(data)) {
+        validSpeakers = data.filter(s => {
+          const normName = (s.name || "").toLowerCase().trim();
+          if (TEST_SPEAKER_NAMES.has(normName)) return false;
+          if (TEST_SPEAKER_IDS.has(s.id)) return false;
+          if (deletedIds.has(s.id)) return false;
+          return true;
+        });
       }
     } catch (e) {}
   }
 
-  // Fallback curated speakers
-  container.innerHTML = CURATED_SPEAKERS.map((s, idx) => `
-    <div class="speaker-card" data-index="${idx}">
-      <div>
-        <div class="speaker-avatar-box">
-          <span style="font-size:32px;font-weight:bold;color:var(--primary-lime);">${escapeHtml(initials(s.name))}</span>
+  if (validSpeakers.length > 0) {
+    loadedSpeakersList = validSpeakers;
+    container.innerHTML = validSpeakers.map((s) => `
+      <div class="speaker-card" data-id="${s.id}">
+        <div>
+          <div class="speaker-avatar-box">
+            ${s.photo_url ? `<img src="${escapeHtml(s.photo_url)}" alt="${escapeHtml(s.name)}"/>` : `<span style="font-size:32px;font-weight:bold;color:var(--primary-lime);">${escapeHtml(initials(s.name))}</span>`}
+          </div>
+          ${s.badge ? `<span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.06em;">${escapeHtml(s.badge)}</span>` : ""}
+          <h3 style="font-size:17px;font-weight:700;color:#ffffff;margin:4px 0 2px;">${escapeHtml(s.name)}</h3>
+          <p style="font-size:13px;color:#c4c2c3;margin:0;">${escapeHtml(s.role || "")}</p>
+          <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(s.company || "")}</p>
         </div>
-        <span style="font-size:11px;font-weight:600;color:var(--primary-lime);text-transform:uppercase;letter-spacing:0.06em;">${escapeHtml(s.badge)}</span>
-        <h3 style="font-size:17px;font-weight:700;color:#ffffff;margin:4px 0 2px;">${escapeHtml(s.name)}</h3>
-        <p style="font-size:13px;color:#c4c2c3;margin:0;">${escapeHtml(s.role)}</p>
-        <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(s.company)}</p>
+        <div style="margin-top:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;color:var(--primary-lime);font-size:12px;font-weight:600;">
+          <span>Session: ${escapeHtml(s.session_title || "View Details")}</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
       </div>
-      <div style="margin-top:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;color:var(--primary-lime);font-size:12px;font-weight:600;">
-        <span>Session: ${escapeHtml(s.session_title)}</span>
-        <i class="fa-solid fa-arrow-right"></i>
+    `).join("");
+    bindSpeakerCards();
+    return;
+  }
+
+  // Pure state when no speakers are added yet
+  container.innerHTML = `
+    <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(159, 213, 75, 0.1); color: var(--primary-lime); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">
+        <i class="fa-solid fa-microphone-lines"></i>
       </div>
+      <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">Keynote Speakers Lineup</h3>
+      <p style="font-size: 13px; color: var(--muted); max-width: 440px; margin: 0 auto;">Official executive keynotes and industry leaders will be announced soon. Stay tuned for our speaker roster.</p>
     </div>
-  `).join("");
-  bindSpeakerCards();
+  `;
 }
 
 // ---------------------------------------------------------------------------
 // 7) PARTNERS DATA
 // ---------------------------------------------------------------------------
-const CURATED_PARTNERS = [
-  { name: "Enterprise AI Alliance", tier: "Anchor Partner" },
-  { name: "Cloud Compute Labs", tier: "Infrastructure" },
-  { name: "Autonomous Systems Group", tier: "Intelligence" },
-  { name: "Venture EMEA Capital", tier: "Investment" },
-  { name: "Nordic Neural Works", tier: "Research" },
-  { name: "Tunisia Digital Matrix", tier: "Ecosystem" }
-];
+const CURATED_PARTNERS = [];
+
+const TEST_PARTNER_NAMES = new Set([
+  "enterprise ai alliance",
+  "cloud compute labs",
+  "autonomous systems group",
+  "venture emea capital",
+  "nordic neural works",
+  "tunisia digital matrix"
+]);
+const TEST_PARTNER_IDS = new Set([
+  "7c33ea85-0c66-4146-bf96-e2819b34b374",
+  "7ad1aa2e-41d9-4905-9eca-80cbfe4ea741",
+  "d538c1bc-0781-4a62-8f3e-256e7ef8555d",
+  "9d70a8e9-4c94-4338-8287-499f7ebe25a6",
+  "453ca534-bd2a-40d3-813f-a3cbe13cab5b",
+  "ee848f31-6dbe-4bfd-ba3a-5df38116a6fe"
+]);
 
 async function loadPartners() {
   const container = document.getElementById("partners-container");
   if (!container) return;
+
+  const deletedIds = getDeletedItemIds("partners");
+  let validPartners = [];
 
   const client = window.supabaseClient || (typeof supabaseClient !== "undefined" ? supabaseClient : null);
   if (client) {
@@ -714,31 +687,44 @@ async function loadPartners() {
         .eq("published", true)
         .order("sort_order", { ascending: true });
 
-      if (!error && data && data.length > 0) {
-        container.innerHTML = data.map(p => `
-          <a href="${p.website_url ? escapeHtml(p.website_url) : "#"}" target="${p.website_url ? "_blank" : "_self"}" class="partner-logo-box">
-            ${p.logo_url 
-              ? `<img src="${escapeHtml(p.logo_url)}" alt="${escapeHtml(p.name)}" style="max-height:48px;max-width:100%;object-fit:contain;"/>` 
-              : `<div style="text-align:center;">
-                  <div style="font-size:14px;font-weight:700;color:#ffffff;">${escapeHtml(p.name)}</div>
-                  ${p.tier ? `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">${escapeHtml(p.tier)}</div>` : ""}
-                </div>`
-            }
-          </a>
-        `).join("");
-        return;
+      if (!error && Array.isArray(data)) {
+        validPartners = data.filter(p => {
+          const normName = (p.name || "").toLowerCase().trim();
+          if (TEST_PARTNER_NAMES.has(normName)) return false;
+          if (TEST_PARTNER_IDS.has(p.id)) return false;
+          if (deletedIds.has(p.id)) return false;
+          return true;
+        });
       }
     } catch (e) {}
   }
 
-  container.innerHTML = CURATED_PARTNERS.map(p => `
-    <div class="partner-logo-box">
-      <div style="text-align:center;">
-        <div style="font-size:14px;font-weight:700;color:#ffffff;">${escapeHtml(p.name)}</div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">${escapeHtml(p.tier)}</div>
+  if (validPartners.length > 0) {
+    container.innerHTML = validPartners.map(p => `
+      <a href="${p.website_url ? escapeHtml(p.website_url) : "#"}" target="${p.website_url ? "_blank" : "_self"}" class="partner-logo-box">
+        ${p.logo_url 
+          ? `<img src="${escapeHtml(p.logo_url)}" alt="${escapeHtml(p.name)}" style="max-height:48px;max-width:100%;object-fit:contain;"/>` 
+          : `<div style="text-align:center;">
+              <div style="font-size:14px;font-weight:700;color:#ffffff;">${escapeHtml(p.name)}</div>
+              ${p.tier ? `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">${escapeHtml(p.tier)}</div>` : ""}
+            </div>`
+        }
+      </a>
+    `).join("");
+    return;
+  }
+
+  // Pure state when no partners are added yet
+  container.innerHTML = `
+    <div style="grid-column: 1 / -1; padding: 40px 24px; text-align: center; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(159, 213, 75, 0.1); color: var(--primary-lime); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">
+        <i class="fa-solid fa-handshake"></i>
       </div>
+      <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">Partners & Strategic Alliances</h3>
+      <p style="font-size: 13px; color: var(--muted); max-width: 460px; margin: 0 auto 16px;">Corporate alliances and technology partnerships are currently being confirmed.</p>
+      <button type="button" class="btn-pill-white" data-open-modal="partner" style="font-size: 12px; padding: 8px 18px;">Become a Partner</button>
     </div>
-  `).join("");
+  `;
 }
 
 // ---------------------------------------------------------------------------
@@ -746,16 +732,27 @@ async function loadPartners() {
 // ---------------------------------------------------------------------------
 const CURATED_TEAM = [
   { name: "Amen Krifi", role: "Organizing Committee President", linkedin: "https://www.linkedin.com/" },
-  { name: "Sarra Ben Amor", role: "VP Corporate Relations & Partnerships", linkedin: "https://www.linkedin.com/" },
-  { name: "Yassine Mansour", role: "VP Marketing & Communications", linkedin: "https://www.linkedin.com/" },
-  { name: "Ines Trabelsi", role: "VP Logistics & Venue Operations", linkedin: "https://www.linkedin.com/" },
-  { name: "Mohamed Dridi", role: "VP Delegate Experience & Strategy", linkedin: "https://www.linkedin.com/" }
+  { name: "Khalil Jbari", role: "Organizing Committee Leadership", linkedin: "https://www.linkedin.com/" }
 ];
+
+const TEST_TEAM_NAMES = new Set([
+  "sarra ben amor",
+  "yassine mansour",
+  "ines trabelsi",
+  "mohamed dridi"
+]);
+const TEST_TEAM_IDS = new Set([
+  "c4cab719-10f3-4d8f-a5ac-1cfb40526df4",
+  "e60f4531-a428-4238-a201-f3b4e41e3828",
+  "db6fc0b7-bd62-419f-ad29-6486261bda6d",
+  "cf31261b-4d47-4111-a630-6c478b606052"
+]);
 
 async function loadTeam() {
   const container = document.getElementById("team-container");
   if (!container) return;
 
+  const deletedIds = getDeletedItemIds("team_members");
   const client = window.supabaseClient || (typeof supabaseClient !== "undefined" ? supabaseClient : null);
   if (client) {
     try {
@@ -765,30 +762,33 @@ async function loadTeam() {
         .eq("published", true)
         .order("sort_order", { ascending: true });
 
-      if (!error && data && data.length > 0) {
-        // If database only has 1 or 2 entries, merge with CURATED_TEAM
-        let list = [...data];
-        if (list.length < 3) {
-          const dbNames = new Set(list.map(m => (m.name || "").toLowerCase().trim()));
-          const extra = CURATED_TEAM.filter(m => !dbNames.has((m.name || "").toLowerCase().trim()));
-          list = [...list, ...extra];
-        }
+      if (!error && Array.isArray(data)) {
+        // Exclude any legacy mock test members or deleted items
+        const filtered = data.filter(m => {
+          const normName = (m.name || "").toLowerCase().trim();
+          if (TEST_TEAM_NAMES.has(normName)) return false;
+          if (TEST_TEAM_IDS.has(m.id)) return false;
+          if (deletedIds.has(m.id)) return false;
+          return true;
+        });
 
-        container.innerHTML = list.map(m => `
-          <div class="team-card">
-            <div class="team-avatar-box">
-              ${m.photo_url ? `<img src="${escapeHtml(m.photo_url)}" alt="${escapeHtml(m.name)}"/>` : `<span style="font-size:28px;font-weight:bold;color:var(--primary-lime);">${escapeHtml(initials(m.name))}</span>`}
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <div>
-                <h4 style="font-size:15px;font-weight:700;color:#ffffff;margin:0;">${escapeHtml(m.name)}</h4>
-                <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(m.role || "")}</p>
+        if (filtered.length > 0) {
+          container.innerHTML = filtered.map(m => `
+            <div class="team-card">
+              <div class="team-avatar-box">
+                ${m.photo_url ? `<img src="${escapeHtml(m.photo_url)}" alt="${escapeHtml(m.name)}"/>` : `<span style="font-size:28px;font-weight:bold;color:var(--primary-lime);">${escapeHtml(initials(m.name))}</span>`}
               </div>
-              ${(m.linkedin_url || m.linkedin) ? `<a href="${escapeHtml(m.linkedin_url || m.linkedin)}" target="_blank" rel="noreferrer" style="width:32px;height:32px;border-radius:50%;background:#28282a;display:grid;place-items:center;color:#ffffff;text-decoration:none;"><i class="fa-brands fa-linkedin-in" style="font-size:13px;"></i></a>` : ""}
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <h4 style="font-size:15px;font-weight:700;color:#ffffff;margin:0;">${escapeHtml(m.name)}</h4>
+                  <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(m.role || "")}</p>
+                </div>
+                ${(m.linkedin_url || m.linkedin) ? `<a href="${escapeHtml(m.linkedin_url || m.linkedin)}" target="_blank" rel="noreferrer" style="width:32px;height:32px;border-radius:50%;background:#28282a;display:grid;place-items:center;color:#ffffff;text-decoration:none;"><i class="fa-brands fa-linkedin-in" style="font-size:13px;"></i></a>` : ""}
+              </div>
             </div>
-          </div>
-        `).join("");
-        return;
+          `).join("");
+          return;
+        }
       }
     } catch (e) {}
   }
@@ -803,9 +803,9 @@ async function loadTeam() {
           <h4 style="font-size:15px;font-weight:700;color:#ffffff;margin:0;">${escapeHtml(m.name)}</h4>
           <p style="font-size:12px;color:var(--muted);margin:2px 0 0;">${escapeHtml(m.role)}</p>
         </div>
-        <a href="${escapeHtml(m.linkedin)}" target="_blank" rel="noreferrer" style="width:32px;height:32px;border-radius:50%;background:#28282a;display:grid;place-items:center;color:#ffffff;text-decoration:none;">
+        ${m.linkedin ? `<a href="${escapeHtml(m.linkedin)}" target="_blank" rel="noreferrer" style="width:32px;height:32px;border-radius:50%;background:#28282a;display:grid;place-items:center;color:#ffffff;text-decoration:none;">
           <i class="fa-brands fa-linkedin-in" style="font-size:13px;"></i>
-        </a>
+        </a>` : ""}
       </div>
     </div>
   `).join("");

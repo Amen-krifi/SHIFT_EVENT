@@ -123,7 +123,7 @@ function getShiftKnowledgeFallback(userQuery) {
   }
 
   if (/(speaker|keynote speaker|intervenant|panelist|faculty|who is speaking)/i.test(q)) {
-    return `**Speakers & Faculty:**\n\nSHIFT 2026 features enterprise technology leaders, venture capital partners, and AI transformation architects from North Africa and EMEA.\n\nHighlights include:\n- **Executive Keynote Speaker:** Scaling enterprise AI platforms and managing multi-year technical debt.\n- **Enterprise Growth Architect:** Production telemetry across 50+ enterprise implementations in fintech and logistics.\n- **Lead Product Architect:** Agentic decision loops, RAG latency, and backend LLM security.\n- **AI Transformation Director:** Facilitating the hands-on enterprise problem-solving lab.\n\nExplore full speaker profiles in the **Speakers** section above!`;
+    return `**Speakers & Keynotes:**\n\nSHIFT 2026 brings together distinguished enterprise technology leaders, venture capital partners, and AI transformation pioneers from North Africa and EMEA.\n\nThe official keynote lineup and guest speakers are being unveiled leading up to the summit on 28 November 2026 at HIDE University.\n\nKeep an eye on the **Speakers** section above or register your pass to receive official speaker announcement bulletins!`;
   }
 
   if (/(what is shift|about|theme|concept|mission|c'est quoi|c est quoi|purpose)/i.test(q) || hasEventKeyword) {
@@ -721,17 +721,23 @@ app.post('/api/applicants/:id/status', (req, res) => {
   return res.status(404).json({ success: false, error: 'Applicant not found' });
 });
 
-// DELETE /api/applicants/:id - Remove applicant
+// DELETE /api/applicants - Clear all applicants
+app.delete(['/api/applicants', '/api/applicants/all'], (req, res) => {
+  saveApplicantsData([]);
+  return res.json({ success: true, message: 'All applicants cleared', remaining: 0 });
+});
+
+// DELETE /api/applicants/:id - Remove single applicant
 app.delete('/api/applicants/:id', (req, res) => {
   const { id } = req.params;
   let applicants = getApplicantsData();
   const initLen = applicants.length;
-  applicants = applicants.filter(a => a.id !== id);
+  applicants = applicants.filter(a => String(a.id) !== String(id) && a.email !== id);
   if (applicants.length === initLen) {
     return res.status(404).json({ success: false, error: 'Applicant not found' });
   }
   saveApplicantsData(applicants);
-  res.json({ success: true });
+  res.json({ success: true, remaining: applicants.length });
 });
 
 // GET /api/email-preview/:code - View rendered email pass with QR code

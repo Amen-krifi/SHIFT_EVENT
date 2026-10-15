@@ -562,11 +562,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-surface-container/40 p-4 rounded-lg border border-surface-border">
             <div class="flex flex-col gap-1">
               <label class="field-label">Speaker / Host Name</label>
-              <input type="text" id="agenda-form-host-name" placeholder="Executive Keynote Speaker"/>
+              <input type="text" id="agenda-form-host-name" placeholder="e.g. Dr. Full Name"/>
             </div>
             <div class="flex flex-col gap-1">
               <label class="field-label">Role / Affiliation</label>
-              <input type="text" id="agenda-form-host-role" placeholder="Founder & CEO · Enterprise AI Scaleup"/>
+              <input type="text" id="agenda-form-host-role" placeholder="e.g. VP AI Architecture"/>
             </div>
             <div class="flex flex-col gap-1">
               <label class="field-label">Host Category Tag</label>
@@ -636,14 +636,9 @@ Live 10-minute executive Q&amp;A"></textarea>
           <p class="font-body-sm text-body-sm text-text-muted">Featured speakers and keynotes presented across the summit.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="speakers" title="Import default summit speakers from the website into database">
-            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
-            <span>Sync Website Speakers</span>
-          </button>
           <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="speakers">+ Add speaker</button>
         </div>
       </div>
-      <div id="sync-notice-speakers" class="hidden mb-4 p-3 rounded-lg bg-surface-card border border-primary-container/30 text-body-sm text-text-primary flex items-center justify-between"></div>
       <div id="form-speakers" class="hidden bg-surface-card border border-surface-border rounded-xl p-6 mb-6"></div>
       <div id="list-speakers" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
@@ -656,14 +651,9 @@ Live 10-minute executive Q&amp;A"></textarea>
           <p class="font-body-sm text-body-sm text-text-muted">AIESEC in Bardo Organizing Committee members displayed on the website.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="team_members" title="Import default organizing committee team members from the website into database">
-            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
-            <span>Sync Website Team</span>
-          </button>
           <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="team_members">+ Add team member</button>
         </div>
       </div>
-      <div id="sync-notice-team_members" class="hidden mb-4 p-3 rounded-lg bg-surface-card border border-primary-container/30 text-body-sm text-text-primary flex items-center justify-between"></div>
       <div id="form-team_members" class="hidden bg-surface-card border border-surface-border rounded-xl p-6 mb-6"></div>
       <div id="list-team_members" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
@@ -676,10 +666,6 @@ Live 10-minute executive Q&amp;A"></textarea>
           <p class="font-body-sm text-body-sm text-text-muted">Corporate and institutional partners featured on the summit website.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button class="sync-defaults-btn px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-xs uppercase transition-colors flex items-center gap-1.5" data-entity="partners" title="Import default partner companies from the website into database">
-            <span class="material-symbols-outlined text-[16px] text-primary-container">sync</span>
-            <span>Sync Website Partners</span>
-          </button>
           <button class="add-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold" data-entity="partners">+ Add partner logo</button>
         </div>
       </div>
@@ -700,6 +686,10 @@ Live 10-minute executive Q&amp;A"></textarea>
           <button id="export-applicants-btn" class="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-code text-label-code uppercase hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[16px]">download</span>
             <span>Export CSV</span>
+          </button>
+          <button id="clear-applicants-btn" type="button" class="px-3.5 py-2 rounded-full bg-error-container/20 text-error hover:bg-error-container/30 font-label-code text-xs uppercase font-semibold transition-colors flex items-center gap-1.5" title="Remove all applicants and start completely fresh">
+            <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+            <span>Clear all applicants</span>
           </button>
           <button id="send-reminders-btn" class="px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-code text-label-code uppercase font-bold flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[16px]">send</span>
